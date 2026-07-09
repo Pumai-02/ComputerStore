@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us — TechNova Computer Store</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="images/icons/favicon.svg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<header class="site-header" id="siteHeader">
+  <div class="header-inner">
+    <a href="index.html" class="logo"><span class="logo-mark"><i class="fa-solid fa-bolt"></i></span>Tech<span>Nova</span></a>
+    <nav class="nav-menu" id="navMenu">
+      <a href="index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="products.html#categories">Categories</a>
+      <a href="products.html?category=gaming-laptops">Gaming</a>
+      <a href="index.html#deals">Deals</a>
+      <a href="about.html" class="active">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn search-open-btn" aria-label="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
+      <a href="wishlist.html" class="icon-btn icon-btn-wrap" aria-label="Wishlist"><i class="fa-regular fa-heart"></i><span class="badge-dot wishlist-count">0</span></a>
+      <a href="cart.html" class="icon-btn icon-btn-wrap" aria-label="Cart"><i class="fa-solid fa-cart-shopping"></i><span class="badge-dot cart-count">0</span></a>
+      <button class="icon-btn theme-toggle" aria-label="Toggle dark mode"><i class="fa-solid fa-moon"></i></button>
+      <button class="icon-btn" aria-label="Account"><i class="fa-regular fa-user"></i></button>
+      <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-panel">
+    <div class="search-input-row">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="searchInput" placeholder="Search laptops, GPUs, monitors...">
+      <button id="searchCloseBtn" aria-label="Close search"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+</div>
+
+<div class="page-banner">
+  <nav class="breadcrumb"><a href="index.html">Home</a> / <span>About</span></nav>
+  <h1>About TechNova</h1>
+</div>
+
+<main>
+  <section class="section container">
+    <div class="about-hero">
+      <div class="fade-up">
+        <span class="eyebrow">Our Story</span>
+        <h2>Technology, Curated for Real Builders</h2>
+        <p>TechNova started as a two-person repair shop and grew into a destination for gamers, creators, and businesses who want genuine hardware, honest pricing, and advice from people who actually build and benchmark every product we sell.</p>
+        <p>Today we carry laptops, desktops, components, and accessories from eight leading brands, backed by official warranties and a support team that answers real questions — not scripts.</p>
+        <a href="products.html" class="btn btn-primary">Browse Our Catalog</a>
+      </div>
+      <div class="about-media fade-up"><i class="fa-solid fa-microchip"></i></div>
+    </div>
+  </section>
+
+  <section class="section-tight container">
+    <div class="stat-grid">
+      <div class="fade-up"><strong>2014</strong><span>Founded</span></div>
+      <div class="fade-up"><strong>50k+</strong><span>Customers Served</span></div>
+      <div class="fade-up"><strong>1,200+</strong><span>Products Listed</span></div>
+      <div class="fade-up"><strong>99.2%</strong><span>On-Time Delivery</span></div>
+    </div>
+  </section>
+
+  <section class="section container">
+    <div class="section-head">
+      <span class="eyebrow">Milestones</span>
+      <h2>Our Journey</h2>
+    </div>
+    <div class="timeline">
+      <div class="timeline-item fade-up">
+        <span class="timeline-year">2014</span>
+        <div><h4>A small repair counter opens</h4><p>TechNova begins as a local PC repair and upgrade counter serving students and small studios.</p></div>
+      </div>
+      <div class="timeline-item fade-up">
+        <span class="timeline-year">2018</span>
+        <div><h4>Online store launches</h4><p>We bring our curated hardware catalog online, partnering directly with eight major manufacturers.</p></div>
+      </div>
+      <div class="timeline-item fade-up">
+        <span class="timeline-year">2021</span>
+        <div><h4>Custom PC building service</h4><p>Our in-house technicians begin assembling and stress-testing custom gaming and workstation builds.</p></div>
+      </div>
+      <div class="timeline-item fade-up">
+        <span class="timeline-year">2026</span>
+        <div><h4>50,000 customers and counting</h4><p>TechNova ships nationwide with same-week delivery and a dedicated technical support line.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section container">
+    <div class="section-head">
+      <span class="eyebrow">The Team</span>
+      <h2>People Behind TechNova</h2>
+      <p>A small team of engineers, technicians, and support specialists who test everything we sell.</p>
+    </div>
+    <div class="team-grid">
+      <div class="team-card fade-up"><div class="team-avatar">J</div><h4>Julia Park</h4><span>Founder &amp; CEO</span></div>
+      <div class="team-card fade-up"><div class="team-avatar">D</div><h4>David Chen</h4><span>Head of Hardware</span></div>
+      <div class="team-card fade-up"><div class="team-avatar">R</div><h4>Rosa Fernandez</h4><span>Customer Support Lead</span></div>
+      <div class="team-card fade-up"><div class="team-avatar">T</div><h4>Tomasz Wolski</h4><span>Logistics Manager</span></div>
+    </div>
+  </section>
+
+  <section class="container">
+    <div class="newsletter fade-up">
+      <div>
+        <h2>Get Exclusive Deals in Your Inbox</h2>
+        <p>Join 30,000+ subscribers for early access to flash sales and new arrivals.</p>
+      </div>
+      <form class="newsletter-form">
+        <input type="email" placeholder="Enter your email address" required aria-label="Email address">
+        <button type="submit" class="btn btn-primary">Subscribe</button>
+        <span class="form-message"></span>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-top">
+    <div class="footer-about">
+      <a href="index.html" class="logo"><span class="logo-mark"><i class="fa-solid fa-bolt"></i></span>Tech<span style="color:#fff">Nova</span></a>
+      <p>Your trusted destination for laptops, desktops, components, and accessories from the world's leading technology brands.</p>
+      <div class="footer-social">
+        <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
+        <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+      </div>
+    </div>
+    <div>
+      <h4>Quick Links</h4>
+      <ul class="footer-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="products.html">Products</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Categories</h4>
+      <ul class="footer-links">
+        <li><a href="products.html?category=gaming-laptops">Gaming Laptops</a></li>
+        <li><a href="products.html?category=desktop-pcs">Desktop PCs</a></li>
+        <li><a href="products.html?category=monitors">Monitors</a></li>
+        <li><a href="products.html?category=graphics-cards">Graphics Cards</a></li>
+        <li><a href="products.html?category=accessories">Accessories</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Customer Service</h4>
+      <ul class="footer-links">
+        <li><a href="cart.html">Cart</a></li>
+        <li><a href="wishlist.html">Wishlist</a></li>
+        <li><a href="faq.html">Shipping &amp; Returns</a></li>
+        <li><a href="contact.html">Track Order</a></li>
+        <li><a href="faq.html">Warranty</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Newsletter</h4>
+      <p style="font-size:0.88rem;color:rgba(255,255,255,0.65)">Subscribe for deals and product drops.</p>
+      <form class="newsletter-form" style="flex-direction:column;align-items:stretch">
+        <input type="email" placeholder="Email address" required aria-label="Email address">
+        <button type="submit" class="btn btn-primary btn-sm">Subscribe</button>
+        <span class="form-message"></span>
+      </form>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <span>© 2026 TechNova Computer Store. All rights reserved.</span>
+    <div class="footer-payments" aria-label="Accepted payment methods">
+      <i class="fa-brands fa-cc-visa"></i><i class="fa-brands fa-cc-mastercard"></i><i class="fa-brands fa-cc-paypal"></i><i class="fa-brands fa-cc-apple-pay"></i>
+    </div>
+  </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
+
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/wishlist.js"></script>
+<script src="js/search.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

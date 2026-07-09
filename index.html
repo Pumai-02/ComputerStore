@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TechNova Computer Store — Power Your Future with the Latest Technology</title>
+<meta name="description" content="Shop laptops, desktops, gaming PCs, monitors, components and accessories from the world's leading tech brands at TechNova.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="images/icons/favicon.svg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<header class="site-header" id="siteHeader">
+  <div class="header-inner">
+    <a href="index.html" class="logo"><span class="logo-mark"><i class="fa-solid fa-bolt"></i></span>Tech<span>Nova</span></a>
+    <nav class="nav-menu" id="navMenu">
+      <a href="index.html" class="active">Home</a>
+      <a href="products.html">Products</a>
+      <a href="products.html#categories">Categories</a>
+      <a href="products.html?category=gaming-laptops">Gaming</a>
+      <a href="#deals">Deals</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn search-open-btn" aria-label="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
+      <a href="wishlist.html" class="icon-btn icon-btn-wrap" aria-label="Wishlist"><i class="fa-regular fa-heart"></i><span class="badge-dot wishlist-count">0</span></a>
+      <a href="cart.html" class="icon-btn icon-btn-wrap" aria-label="Cart"><i class="fa-solid fa-cart-shopping"></i><span class="badge-dot cart-count">0</span></a>
+      <button class="icon-btn theme-toggle" aria-label="Toggle dark mode"><i class="fa-solid fa-moon"></i></button>
+      <button class="icon-btn" aria-label="Account"><i class="fa-regular fa-user"></i></button>
+      <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-panel">
+    <div class="search-input-row">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="searchInput" placeholder="Search laptops, GPUs, monitors...">
+      <button id="searchCloseBtn" aria-label="Close search"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+</div>
+
+<main>
+
+  <!-- Hero -->
+  <section class="hero container">
+    <div class="hero-content">
+      <span class="eyebrow">New Arrivals Weekly</span>
+      <h1 class="fade-up">Power Your Future with the Latest Technology</h1>
+      <p class="fade-up">Discover laptops, desktops, gaming PCs, monitors, components, and accessories from the world's leading brands.</p>
+      <div class="hero-actions fade-up">
+        <a href="products.html" class="btn btn-primary">Shop Now <i class="fa-solid fa-arrow-right"></i></a>
+        <a href="#categories" class="btn btn-ghost">Explore Products</a>
+      </div>
+      <div class="hero-stats fade-up">
+        <div><strong>50k+</strong><span>Happy Customers</span></div>
+        <div><strong>1,200+</strong><span>Products</span></div>
+        <div><strong>8</strong><span>Top Brands</span></div>
+        <div><strong>4.8/5</strong><span>Average Rating</span></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="device-stack">
+        <div class="device-panel p1"><i class="fa-solid fa-laptop"></i></div>
+        <div class="device-panel p2"><i class="fa-solid fa-display"></i></div>
+        <div class="device-panel p3"><i class="fa-solid fa-keyboard"></i></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="trust-bar">
+      <span><i class="fa-solid fa-circle-check"></i> 100% Genuine Products</span>
+      <span><i class="fa-solid fa-circle-check"></i> Official Warranty</span>
+      <span><i class="fa-solid fa-circle-check"></i> Fast Nationwide Delivery</span>
+      <span><i class="fa-solid fa-circle-check"></i> Secure Checkout</span>
+    </div>
+  </div>
+
+  <!-- Shop by Brand -->
+  <section class="section-tight container">
+    <div class="section-head">
+      <span class="eyebrow">Trusted Partners</span>
+      <h2>Shop by Brand</h2>
+      <p>Genuine hardware sourced directly from the manufacturers you trust.</p>
+    </div>
+    <div class="brand-grid" id="brandGrid"></div>
+  </section>
+
+  <!-- Shop by Category -->
+  <section class="section container" id="categories">
+    <div class="section-head">
+      <span class="eyebrow">Browse</span>
+      <h2>Shop by Category</h2>
+      <p>Everything you need to build, upgrade, or complete your setup.</p>
+    </div>
+    <div class="category-grid" id="categoryGrid"></div>
+  </section>
+
+  <!-- Featured Products -->
+  <section class="section container">
+    <div class="section-head">
+      <span class="eyebrow">Handpicked</span>
+      <h2>Featured Products</h2>
+      <p>Our best-selling and newest arrivals, updated weekly.</p>
+    </div>
+    <div class="product-grid" id="featuredGrid"></div>
+    <div class="text-center mt-lg">
+      <a href="products.html" class="btn btn-outline">View All Products <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+  </section>
+
+  <!-- Deals -->
+  <section class="section container" id="deals">
+    <div class="deals-banner fade-up">
+      <div>
+        <h2><i class="fa-solid fa-bolt"></i> Flash Sale — Limited Time</h2>
+        <p>Save big on select laptops, GPUs, and gaming rigs before the timer runs out.</p>
+      </div>
+      <div class="countdown">
+        <div class="cd-box"><strong class="cd-days">00</strong><span>Days</span></div>
+        <div class="cd-box"><strong class="cd-hours">00</strong><span>Hrs</span></div>
+        <div class="cd-box"><strong class="cd-mins">00</strong><span>Min</span></div>
+        <div class="cd-box"><strong class="cd-secs">00</strong><span>Sec</span></div>
+      </div>
+    </div>
+    <div class="product-grid" id="dealsGrid"></div>
+  </section>
+
+  <!-- Why choose us -->
+  <section class="section container">
+    <div class="section-head">
+      <span class="eyebrow">Why TechNova</span>
+      <h2>Why Choose Us</h2>
+      <p>We back every order with the service standard our customers expect.</p>
+    </div>
+    <div class="feature-grid">
+      <div class="feature-card fade-up"><span class="feature-icon"><i class="fa-solid fa-certificate"></i></span><h3>100% Genuine Products</h3><p>Every item is sourced directly from authorized distributors.</p></div>
+      <div class="feature-card fade-up"><span class="feature-icon"><i class="fa-solid fa-shield-halved"></i></span><h3>Official Warranty</h3><p>Full manufacturer warranty coverage on every purchase.</p></div>
+      <div class="feature-card fade-up"><span class="feature-icon"><i class="fa-solid fa-truck-fast"></i></span><h3>Fast Delivery</h3><p>Next-day dispatch with real-time order tracking.</p></div>
+      <div class="feature-card fade-up"><span class="feature-icon"><i class="fa-solid fa-lock"></i></span><h3>Secure Payment</h3><p>Encrypted checkout with multiple trusted payment options.</p></div>
+      <div class="feature-card fade-up"><span class="feature-icon"><i class="fa-solid fa-headset"></i></span><h3>Expert Support</h3><p>Real technicians ready to help you choose and troubleshoot.</p></div>
+      <div class="feature-card fade-up"><span class="feature-icon"><i class="fa-solid fa-rotate-left"></i></span><h3>Easy Returns</h3><p>30-day hassle-free returns on unopened and defective items.</p></div>
+    </div>
+  </section>
+
+  <!-- Reviews -->
+  <section class="section container">
+    <div class="section-head">
+      <span class="eyebrow">Testimonials</span>
+      <h2>What Our Customers Say</h2>
+      <p>Real feedback from builders, gamers, and professionals.</p>
+    </div>
+    <div class="review-grid">
+      <div class="review-card fade-up">
+        <div class="review-header"><span class="review-avatar">M</span><div><strong>Marcus T.</strong><div class="stars">★★★★★</div></div></div>
+        <p>Ordered a full gaming rig — arrived two days early and perfectly packed. Performance is exactly as advertised.</p>
+      </div>
+      <div class="review-card fade-up">
+        <div class="review-header"><span class="review-avatar">S</span><div><strong>Sarah L.</strong><div class="stars">★★★★★</div></div></div>
+        <p>Support helped me pick the right GPU for my case before I even ordered. That kind of guidance is rare.</p>
+      </div>
+      <div class="review-card fade-up">
+        <div class="review-header"><span class="review-avatar">A</span><div><strong>Ahmed K.</strong><div class="stars">★★★★☆</div></div></div>
+        <p>Great prices on components, and the warranty process was refreshingly simple when I needed it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter -->
+  <section class="container">
+    <div class="newsletter fade-up">
+      <div>
+        <h2>Get Exclusive Deals in Your Inbox</h2>
+        <p>Join 30,000+ subscribers for early access to flash sales and new arrivals.</p>
+      </div>
+      <form class="newsletter-form">
+        <input type="email" placeholder="Enter your email address" required aria-label="Email address">
+        <button type="submit" class="btn btn-primary">Subscribe</button>
+        <span class="form-message"></span>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-top">
+    <div class="footer-about">
+      <a href="index.html" class="logo"><span class="logo-mark"><i class="fa-solid fa-bolt"></i></span>Tech<span style="color:#fff">Nova</span></a>
+      <p>Your trusted destination for laptops, desktops, components, and accessories from the world's leading technology brands.</p>
+      <div class="footer-social">
+        <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
+        <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+      </div>
+    </div>
+    <div>
+      <h4>Quick Links</h4>
+      <ul class="footer-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="products.html">Products</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Categories</h4>
+      <ul class="footer-links">
+        <li><a href="products.html?category=gaming-laptops">Gaming Laptops</a></li>
+        <li><a href="products.html?category=desktop-pcs">Desktop PCs</a></li>
+        <li><a href="products.html?category=monitors">Monitors</a></li>
+        <li><a href="products.html?category=graphics-cards">Graphics Cards</a></li>
+        <li><a href="products.html?category=accessories">Accessories</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Customer Service</h4>
+      <ul class="footer-links">
+        <li><a href="cart.html">Cart</a></li>
+        <li><a href="wishlist.html">Wishlist</a></li>
+        <li><a href="faq.html">Shipping &amp; Returns</a></li>
+        <li><a href="contact.html">Track Order</a></li>
+        <li><a href="faq.html">Warranty</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Newsletter</h4>
+      <p style="font-size:0.88rem;color:rgba(255,255,255,0.65)">Subscribe for deals and product drops.</p>
+      <form class="newsletter-form" style="flex-direction:column;align-items:stretch">
+        <input type="email" placeholder="Email address" required aria-label="Email address">
+        <button type="submit" class="btn btn-primary btn-sm">Subscribe</button>
+        <span class="form-message"></span>
+      </form>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <span>© 2026 TechNova Computer Store. All rights reserved.</span>
+    <div class="footer-payments" aria-label="Accepted payment methods">
+      <i class="fa-brands fa-cc-visa"></i><i class="fa-brands fa-cc-mastercard"></i><i class="fa-brands fa-cc-paypal"></i><i class="fa-brands fa-cc-apple-pay"></i>
+    </div>
+  </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
+
+<div class="modal" id="quickViewModal">
+  <div class="modal-panel">
+    <button class="modal-close" data-close-modal aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    <div id="quickViewBody"></div>
+  </div>
+</div>
+
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/wishlist.js"></script>
+<script src="js/search.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+/* ==========================================================================
+   TechNova — Responsive Rules
+   Breakpoints: Desktop (default) → Laptop 1180 → Tablet 860 → Mobile 560
+   ========================================================================== */
+
+/* ---- Laptop (<=1180px) --------------------------------------------------*/
+@media (max-width: 1180px) {
+  .product-grid { grid-template-columns: repeat(3, 1fr); }
+  .category-grid { grid-template-columns: repeat(4, 1fr); }
+  .brand-grid { grid-template-columns: repeat(4, 1fr); }
+  .feature-grid, .review-grid { grid-template-columns: repeat(2, 1fr); }
+  .team-grid { grid-template-columns: repeat(2, 1fr); }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); gap: 28px; }
+  .hero { grid-template-columns: 1fr; text-align: center; padding: 70px 32px; }
+  .hero p { margin: 0 auto; }
+  .hero-actions, .hero-stats { justify-content: center; }
+  .hero-visual { order: -1; max-width: 320px; margin: 0 auto; }
+}
+
+/* ---- Tablet (<=860px) ---------------------------------------------------*/
+@media (max-width: 860px) {
+  .nav-menu {
+    position: fixed; top: calc(var(--header-h) + 10px); left: 16px; right: 16px;
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow-lg);
+    flex-direction: column; align-items: stretch; padding: 12px;
+    max-height: 0; overflow: hidden; opacity: 0; pointer-events: none;
+    transition: all 0.3s ease; border: 1px solid var(--border);
+  }
+  .nav-menu.open { max-height: 480px; opacity: 1; pointer-events: all; padding: 12px; }
+  .nav-menu a { padding: 14px 16px; }
+  .nav-toggle { display: flex; }
+  .header-inner { border-radius: var(--radius); }
+
+  .products-layout, .cart-layout, .contact-layout, .about-hero, .pd-layout { grid-template-columns: 1fr; }
+  .filters-panel { position: static; }
+  .category-grid { grid-template-columns: repeat(3, 1fr); }
+  .brand-grid { grid-template-columns: repeat(3, 1fr); }
+  .product-grid { grid-template-columns: repeat(2, 1fr); }
+  .feature-grid, .review-grid, .team-grid { grid-template-columns: 1fr; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .footer-top { grid-template-columns: repeat(2, 1fr); }
+  .form-row { grid-template-columns: 1fr; }
+  #quickViewBody { grid-template-columns: 1fr; }
+  .quick-view-media { border-radius: var(--radius-lg) var(--radius-lg) 0 0; min-height: 220px; }
+  .deals-banner, .newsletter { flex-direction: column; text-align: center; }
+  .newsletter-form { justify-content: center; }
+  .cart-line { grid-template-columns: 70px 1fr; grid-template-rows: auto auto; }
+  .cart-line-qty, .cart-line-price { grid-column: 2; }
+}
+
+/* ---- Mobile (<=560px) ---------------------------------------------------*/
+@media (max-width: 560px) {
+  .container { padding: 0 16px; }
+  .section { padding: 60px 0; }
+  .hero { padding: 52px 20px; border-radius: var(--radius); }
+  .hero-stats { flex-wrap: wrap; gap: 20px; }
+  .category-grid, .brand-grid, .product-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .footer-top { grid-template-columns: 1fr; text-align: left; gap: 28px; padding: 48px 0 28px; }
+  .footer-bottom { flex-direction: column; text-align: center; }
+  .page-banner { padding: 44px 22px; border-radius: var(--radius); }
+  .deals-banner { padding: 30px 22px; }
+  .countdown .cd-box { min-width: 52px; padding: 8px 10px; }
+  .newsletter { padding: 36px 24px; }
+  .newsletter-form input { min-width: 0; width: 100%; }
+  .btn-block-mobile { width: 100%; }
+  .cart-summary { position: static; }
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+  .timeline-item { grid-template-columns: 60px 1fr; }
+  .timeline-item::before { left: 70px; }
+  .search-overlay { padding: 70px 12px; }
+}

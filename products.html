@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All Products — TechNova Computer Store</title>
+<meta name="description" content="Browse laptops, desktops, gaming PCs, monitors, components and accessories. Filter by brand, category, price, and rating.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="images/icons/favicon.svg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<header class="site-header" id="siteHeader">
+  <div class="header-inner">
+    <a href="index.html" class="logo"><span class="logo-mark"><i class="fa-solid fa-bolt"></i></span>Tech<span>Nova</span></a>
+    <nav class="nav-menu" id="navMenu">
+      <a href="index.html">Home</a>
+      <a href="products.html" class="active">Products</a>
+      <a href="#categories">Categories</a>
+      <a href="products.html?category=gaming-laptops">Gaming</a>
+      <a href="index.html#deals">Deals</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn search-open-btn" aria-label="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
+      <a href="wishlist.html" class="icon-btn icon-btn-wrap" aria-label="Wishlist"><i class="fa-regular fa-heart"></i><span class="badge-dot wishlist-count">0</span></a>
+      <a href="cart.html" class="icon-btn icon-btn-wrap" aria-label="Cart"><i class="fa-solid fa-cart-shopping"></i><span class="badge-dot cart-count">0</span></a>
+      <button class="icon-btn theme-toggle" aria-label="Toggle dark mode"><i class="fa-solid fa-moon"></i></button>
+      <button class="icon-btn" aria-label="Account"><i class="fa-regular fa-user"></i></button>
+      <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-panel">
+    <div class="search-input-row">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="searchInput" placeholder="Search laptops, GPUs, monitors...">
+      <button id="searchCloseBtn" aria-label="Close search"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+</div>
+
+<div class="page-banner">
+  <nav class="breadcrumb"><a href="index.html">Home</a> / <span>Products</span></nav>
+  <h1>All Products</h1>
+</div>
+
+<main class="section container" id="categories">
+
+  <div class="category-chips" id="categoryChipsWrap">
+    <button class="category-chip" data-category="all">All</button>
+    <button class="category-chip" data-category="gaming-laptops">Gaming Laptops</button>
+    <button class="category-chip" data-category="business-laptops">Business Laptops</button>
+    <button class="category-chip" data-category="desktop-pcs">Desktop PCs</button>
+    <button class="category-chip" data-category="gaming-pcs">Gaming PCs</button>
+    <button class="category-chip" data-category="monitors">Monitors</button>
+    <button class="category-chip" data-category="graphics-cards">Graphics Cards</button>
+    <button class="category-chip" data-category="motherboards">Motherboards</button>
+    <button class="category-chip" data-category="ram">RAM</button>
+    <button class="category-chip" data-category="ssd">SSD</button>
+    <button class="category-chip" data-category="hdd">HDD</button>
+    <button class="category-chip" data-category="power-supply">Power Supply</button>
+    <button class="category-chip" data-category="pc-cases">PC Cases</button>
+    <button class="category-chip" data-category="cooling">Cooling</button>
+    <button class="category-chip" data-category="keyboard">Keyboards</button>
+    <button class="category-chip" data-category="mouse">Mice</button>
+    <button class="category-chip" data-category="headsets">Headsets</button>
+    <button class="category-chip" data-category="webcam">Webcams</button>
+    <button class="category-chip" data-category="accessories">Accessories</button>
+  </div>
+
+  <div class="products-layout">
+    <aside class="filters-panel">
+      <div class="filter-group">
+        <h4>Search</h4>
+        <input type="text" id="productSearchBox" placeholder="Search products...">
+      </div>
+      <div class="filter-group">
+        <h4>Brand</h4>
+        <label class="filter-check"><input type="checkbox" class="filter-brand" value="ASUS"> ASUS</label>
+        <label class="filter-check"><input type="checkbox" class="filter-brand" value="MSI"> MSI</label>
+        <label class="filter-check"><input type="checkbox" class="filter-brand" value="Dell"> Dell</label>
+        <label class="filter-check"><input type="checkbox" class="filter-brand" value="Apple"> Apple</label>
+        <label class="filter-check"><input type="checkbox" class="filter-brand" value="Lenovo"> Lenovo</label>
+        <label class="filter-check"><input type="checkbox" class="filter-brand" value="Acer"> Acer</label>
+        <label class="filter-check"><input type="checkbox" class="filter-brand" value="HP"> HP</label>
+        <label class="filter-check"><input type="checkbox" class="filter-brand" value="ROG"> ROG</label>
+      </div>
+      <div class="filter-group">
+        <h4>Max Price</h4>
+        <input type="range" id="priceRange" min="50" max="5000" step="50" value="5000">
+        <div class="price-value" id="priceValue">$5,000</div>
+      </div>
+      <div class="filter-group">
+        <h4>Rating</h4>
+        <label class="filter-check"><input type="checkbox" class="filter-rating" value="4"> 4★ &amp; up</label>
+        <label class="filter-check"><input type="checkbox" class="filter-rating" value="3"> 3★ &amp; up</label>
+      </div>
+      <div class="filter-group">
+        <label class="filter-check"><input type="checkbox" id="filterInStock"> In stock only</label>
+      </div>
+      <button class="btn btn-outline btn-block" id="clearFiltersBtn">Clear Filters</button>
+    </aside>
+
+    <div>
+      <div class="products-toolbar">
+        <span class="result-count" id="resultCount">Showing all products</span>
+        <div class="sort-select-wrap">
+          <label for="sortSelect">Sort by</label>
+          <select id="sortSelect">
+            <option value="featured">Featured</option>
+            <option value="newest">Newest</option>
+            <option value="bestselling">Best Selling</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="rating">Highest Rated</option>
+          </select>
+        </div>
+      </div>
+      <div class="product-grid" id="productGrid"></div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-top">
+    <div class="footer-about">
+      <a href="index.html" class="logo"><span class="logo-mark"><i class="fa-solid fa-bolt"></i></span>Tech<span style="color:#fff">Nova</span></a>
+      <p>Your trusted destination for laptops, desktops, components, and accessories from the world's leading technology brands.</p>
+      <div class="footer-social">
+        <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
+        <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+      </div>
+    </div>
+    <div>
+      <h4>Quick Links</h4>
+      <ul class="footer-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="products.html">Products</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Categories</h4>
+      <ul class="footer-links">
+        <li><a href="products.html?category=gaming-laptops">Gaming Laptops</a></li>
+        <li><a href="products.html?category=desktop-pcs">Desktop PCs</a></li>
+        <li><a href="products.html?category=monitors">Monitors</a></li>
+        <li><a href="products.html?category=graphics-cards">Graphics Cards</a></li>
+        <li><a href="products.html?category=accessories">Accessories</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Customer Service</h4>
+      <ul class="footer-links">
+        <li><a href="cart.html">Cart</a></li>
+        <li><a href="wishlist.html">Wishlist</a></li>
+        <li><a href="faq.html">Shipping &amp; Returns</a></li>
+        <li><a href="contact.html">Track Order</a></li>
+        <li><a href="faq.html">Warranty</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Newsletter</h4>
+      <p style="font-size:0.88rem;color:rgba(255,255,255,0.65)">Subscribe for deals and product drops.</p>
+      <form class="newsletter-form" style="flex-direction:column;align-items:stretch">
+        <input type="email" placeholder="Email address" required aria-label="Email address">
+        <button type="submit" class="btn btn-primary btn-sm">Subscribe</button>
+        <span class="form-message"></span>
+      </form>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <span>© 2026 TechNova Computer Store. All rights reserved.</span>
+    <div class="footer-payments" aria-label="Accepted payment methods">
+      <i class="fa-brands fa-cc-visa"></i><i class="fa-brands fa-cc-mastercard"></i><i class="fa-brands fa-cc-paypal"></i><i class="fa-brands fa-cc-apple-pay"></i>
+    </div>
+  </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
+
+<div class="modal" id="quickViewModal">
+  <div class="modal-panel">
+    <button class="modal-close" data-close-modal aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    <div id="quickViewBody"></div>
+  </div>
+</div>
+
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/wishlist.js"></script>
+<script src="js/search.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
