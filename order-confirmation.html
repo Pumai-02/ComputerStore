@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order Confirmed — TechNova Computer Store</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="images/icons/favicon.svg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<header class="site-header" id="siteHeader">
+  <div class="header-inner">
+    <a href="index.html" class="logo"><span class="logo-mark"><i class="fa-solid fa-bolt"></i></span>Tech<span>Nova</span></a>
+    <nav class="nav-menu" id="navMenu">
+      <a href="index.html">Home</a>
+      <a href="products.html">Products</a>
+    </nav>
+    <div class="header-actions">
+      <a href="wishlist.html" class="icon-btn icon-btn-wrap" aria-label="Wishlist"><i class="fa-regular fa-heart"></i><span class="badge-dot wishlist-count">0</span></a>
+      <a href="cart.html" class="icon-btn icon-btn-wrap" aria-label="Cart"><i class="fa-solid fa-cart-shopping"></i><span class="badge-dot cart-count">0</span></a>
+      <a href="login.html" class="icon-btn" id="accountLink" aria-label="Account"><i class="fa-regular fa-user"></i></a>
+    </div>
+  </div>
+</header>
+
+<main class="section container">
+  <div class="empty-state fade-up" style="padding:60px 0">
+    <i class="fa-solid fa-circle-check" style="font-size:3rem;color:#16a34a"></i>
+    <h1 style="margin:16px 0 4px">Order Confirmed!</h1>
+    <p id="orderNumberLine">Thank you for your order.</p>
+    <p>A confirmation has been recorded on your account. You can review it anytime from <a href="account.html">My Account</a>.</p>
+    <a href="products.html" class="btn btn-primary" style="margin-top:16px">Continue Shopping</a>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-bottom">
+    <span>© 2026 TechNova Computer Store. All rights reserved.</span>
+  </div>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    updateAuthUI();
+    const order = new URLSearchParams(window.location.search).get("order");
+    if (order) {
+      document.getElementById("orderNumberLine").textContent = `Your order ${order} has been placed successfully.`;
+    }
+  });
+</script>
+</body>
+</html>

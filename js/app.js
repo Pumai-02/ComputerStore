@@ -155,7 +155,7 @@ function validateEmail(email) {
 
 function initForms() {
   document.querySelectorAll(".newsletter-form").forEach((form) => {
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const input = form.querySelector('input[type="email"]');
       const msg = form.querySelector(".form-message");
@@ -164,14 +164,20 @@ function initForms() {
         msg.className = "form-message error";
         return;
       }
-      msg.textContent = "You're subscribed! Watch your inbox for exclusive deals.";
-      msg.className = "form-message success";
-      form.reset();
+      try {
+        const res = await api.post("/newsletter/subscribe", { email: input.value }, { auth: false });
+        msg.textContent = res.message || "You're subscribed! Watch your inbox for exclusive deals.";
+        msg.className = "form-message success";
+        form.reset();
+      } catch (err) {
+        msg.textContent = err.message || "Something went wrong. Please try again.";
+        msg.className = "form-message error";
+      }
     });
   });
 
   const contactForm = document.getElementById("contactForm");
-  contactForm?.addEventListener("submit", (e) => {
+  contactForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const name = document.getElementById("cf-name");
     const email = document.getElementById("cf-email");
@@ -204,9 +210,20 @@ function initForms() {
       feedback.className = "form-message error";
       return;
     }
-    feedback.textContent = "Thanks for reaching out! Our team will reply within 24 hours.";
-    feedback.className = "form-message success";
-    contactForm.reset();
+
+    try {
+      const res = await api.post(
+        "/contact",
+        { name: name.value, email: email.value, subject: subject.value, message: message.value },
+        { auth: false }
+      );
+      feedback.textContent = res.message || "Thanks for reaching out! Our team will reply within 24 hours.";
+      feedback.className = "form-message success";
+      contactForm.reset();
+    } catch (err) {
+      feedback.textContent = err.message || "Something went wrong sending your message. Please try again.";
+      feedback.className = "form-message error";
+    }
   });
 }
 
@@ -220,11 +237,13 @@ function initQuickView() {
     const trigger = e.target.closest(".quick-view");
     if (trigger) {
       e.preventDefault();
-      const product = PRODUCTS.find((p) => p.id === trigger.dataset.id);
+      const product = PRODUCTS.find((p) => String(p.id) === String(trigger.dataset.id));
       if (!product) return;
+      const imgUrl = productImageUrl(product);
+      const img = imgUrl ? `<img src="${imgUrl}" alt="${product.name}" loading="lazy" onerror="this.remove()">` : "";
       body.innerHTML = `
         <div class="quick-view-media" style="background:${product.color}">
-          <img src="${productImageUrl(product)}" alt="${product.name}" loading="lazy" onerror="this.remove()">
+          ${img}
           <i class="fa-solid ${categoryIcon(product.category)}"></i>
         </div>
         <div class="quick-view-info">
@@ -236,7 +255,7 @@ function initQuickView() {
           ${stockLabel(product.stock)}
           <div class="quick-view-actions">
             <button class="btn btn-primary add-to-cart-btn" data-id="${product.id}"><i class="fa-solid fa-cart-plus"></i> Add to Cart</button>
-            <a class="btn btn-outline" href="product-details.html?id=${product.id}">View Full Details</a>
+            <a class="btn btn-outline" href="product-details.html?slug=${product.slug}">View Full Details</a>
           </div>
         </div>`;
       modal.classList.add("open");
@@ -273,9 +292,10 @@ function initHomePage() {
 
   const brandGrid = document.getElementById("brandGrid");
   if (brandGrid) {
-    brandGrid.innerHTML = BRANDS.map(
-      (b) => `<a class="brand-card fade-up" href="products.html?q=${encodeURIComponent(b)}"><span>${b}</span></a>`
-    ).join("");
+    const brands = [...new Set(PRODUCTS.map((p) => p.brand).filter(Boolean))];
+    brandGrid.innerHTML = brands
+      .map((b) => `<a class="brand-card fade-up" href="products.html?q=${encodeURIComponent(b)}"><span>${b}</span></a>`)
+      .join("");
   }
 
   const categoryGrid = document.getElementById("categoryGrid");
@@ -297,30 +317,48 @@ const SAMPLE_REVIEWS = [
   { name: "Jonas K.", rating: 5, comment: "Build quality feels premium and the display is stunning in person." },
 ];
 
-function initProductDetailsPage() {
+async function initProductDetailsPage() {
   const container = document.getElementById("productDetails");
   if (!container) return;
 
-  const id = new URLSearchParams(window.location.search).get("id");
-  const product = PRODUCTS.find((p) => p.id === id) || PRODUCTS[0];
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get("slug") || params.get("id");
+  container.innerHTML = `<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading product…</p></div>`;
+
+  let product;
+  try {
+    product = slug ? await fetchProductBySlug(slug) : PRODUCTS[0];
+  } catch (err) {
+    product = PRODUCTS.find((p) => String(p.id) === String(slug)) || null;
+  }
+
+  if (!product) {
+    container.innerHTML = `<div class="empty-state"><i class="fa-solid fa-triangle-exclamation"></i><p>We couldn't find that product.</p><a href="products.html" class="btn btn-primary">Browse Products</a></div>`;
+    return;
+  }
 
   document.title = `${product.name} — TechNova Computer Store`;
+
+  const galleryUrls = [0, 1, 2, 3].map((i) => productImageUrl(product, i));
+  const mainImg = galleryUrls[0]
+    ? `<img id="pdMainImg" src="${galleryUrls[0]}" alt="${product.name}" onerror="this.remove()">`
+    : "";
 
   container.innerHTML = `
     <div class="pd-gallery">
       <div class="pd-main-image" id="pdMainImage" style="background:${product.color}">
-        <img id="pdMainImg" src="${productImageUrl(product, 0)}" alt="${product.name}" onerror="this.remove()">
+        ${mainImg}
         <i class="fa-solid ${categoryIcon(product.category)}"></i>
       </div>
       <div class="pd-thumbs">
-        ${[0, 1, 2, 3]
-          .map(
-            (i) =>
-              `<button class="pd-thumb ${i === 0 ? "active" : ""}" style="background:${product.color}" data-idx="${i}">
-                <img src="${productImageUrl(product, i)}" alt="${product.name} view ${i + 1}" loading="lazy" onerror="this.remove()">
+        ${galleryUrls
+          .map((url, i) => {
+            const thumbImg = url ? `<img src="${url}" alt="${product.name} view ${i + 1}" loading="lazy" onerror="this.remove()">` : "";
+            return `<button class="pd-thumb ${i === 0 ? "active" : ""}" style="background:${product.color}" data-idx="${i}">
+                ${thumbImg}
                 <i class="fa-solid ${categoryIcon(product.category)}"></i>
-              </button>`
-          )
+              </button>`;
+          })
           .join("")}
       </div>
     </div>
@@ -378,7 +416,8 @@ function initProductDetailsPage() {
       thumb.classList.add("active");
       const mainImg = document.getElementById("pdMainImg");
       const idx = parseInt(thumb.dataset.idx, 10);
-      if (mainImg) mainImg.src = productImageUrl(product, idx);
+      const url = productImageUrl(product, idx);
+      if (mainImg && url) mainImg.src = url;
     })
   );
 
@@ -397,9 +436,10 @@ function initProductDetailsPage() {
   // Specs table
   const specsTable = document.getElementById("pdSpecsTable");
   if (specsTable) {
-    specsTable.innerHTML = Object.entries(product.specTable)
-      .map(([key, val]) => `<tr><th>${key}</th><td>${val}</td></tr>`)
-      .join("");
+    const entries = Object.entries(product.specTable);
+    specsTable.innerHTML = entries.length
+      ? entries.map(([key, val]) => `<tr><th>${key}</th><td>${val}</td></tr>`).join("")
+      : `<tr><td colspan="2">No detailed specifications available for this product yet.</td></tr>`;
   }
 
   // Reviews
@@ -429,7 +469,7 @@ function initProductDetailsPage() {
 }
 
 /* ---- Init ---------------------------------------------------------------*/
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   initNav();
   initDarkMode();
   initBackToTop();
@@ -437,9 +477,12 @@ document.addEventListener("DOMContentLoaded", () => {
   initAccordion();
   initCountdown();
   initForms();
+
+  await Promise.all([catalogReady, typeof wishlistReady !== "undefined" ? wishlistReady : Promise.resolve()]);
+
   initQuickView();
   initHomePage();
-  initProductDetailsPage();
+  await initProductDetailsPage();
   updateCartCount();
   updateWishlistCount();
   initScrollReveal();

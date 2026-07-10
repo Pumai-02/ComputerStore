@@ -1,5 +1,7 @@
 /* ==========================================================================
    TechNova — Search, Filters & Sort
+   Filters/sorts run client-side over the catalog fetched by products.js
+   (catalogReady) — the same UX as before, now backed by real API data.
    ========================================================================== */
 
 function searchProducts(query) {
@@ -61,7 +63,7 @@ function initHeaderSearch() {
       .slice(0, 6)
       .map(
         (p) => `
-      <a class="search-result-row" href="product-details.html?id=${p.id}">
+      <a class="search-result-row" href="product-details.html?slug=${p.slug}">
         <span class="search-result-icon" style="background:${p.color}"><i class="fa-solid ${categoryIcon(p.category)}"></i></span>
         <span>
           <strong>${p.name}</strong>
@@ -135,7 +137,7 @@ function initProductsPage() {
         list.sort((a, b) => b.rating - a.rating);
         break;
       case "newest":
-        list.sort((a, b) => new Date(b.added) - new Date(a.added));
+        list.sort((a, b) => new Date(b.added || 0) - new Date(a.added || 0));
         break;
       case "bestselling":
         list.sort((a, b) => b.reviews - a.reviews);
@@ -220,7 +222,8 @@ function initProductsPage() {
   apply();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   initHeaderSearch();
+  await catalogReady;
   initProductsPage();
 });

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Product Details — TechNova Computer Store</title>
+<title>Checkout — TechNova Computer Store</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="icon" type="image/svg+xml" href="images/icons/favicon.svg">
@@ -19,7 +19,7 @@
     <a href="index.html" class="logo"><span class="logo-mark"><i class="fa-solid fa-bolt"></i></span>Tech<span>Nova</span></a>
     <nav class="nav-menu" id="navMenu">
       <a href="index.html">Home</a>
-      <a href="products.html" class="active">Products</a>
+      <a href="products.html">Products</a>
       <a href="products.html#categories">Categories</a>
       <a href="products.html?category=gaming-laptops">Gaming</a>
       <a href="index.html#deals">Deals</a>
@@ -48,27 +48,61 @@
   </div>
 </div>
 
-<main class="section container">
-  <div class="pd-layout" id="productDetails"></div>
+<div class="page-banner">
+  <nav class="breadcrumb"><a href="index.html">Home</a> / <a href="cart.html">Cart</a> / <span>Checkout</span></nav>
+  <h1>Checkout</h1>
+</div>
 
-  <div class="pd-tabs">
-    <button class="pd-tab-btn active" data-tab="specs">Specifications</button>
-    <button class="pd-tab-btn" data-tab="reviews">Reviews</button>
+<main class="section container" id="checkoutContent">
+  <div class="contact-layout">
+    <div class="contact-form-card fade-up">
+      <h2>Shipping &amp; Payment</h2>
+      <p>Your order is protected with Stripe's secure payment processing.</p>
+      <form id="checkoutForm" novalidate>
+        <div class="form-field">
+          <label for="co-name">Full Name *</label>
+          <input type="text" id="co-name" name="name" placeholder="Jane Doe" required>
+        </div>
+        <div class="form-field">
+          <label for="co-address">Address *</label>
+          <input type="text" id="co-address" name="address" placeholder="123 Main St" required>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="co-city">City *</label>
+            <input type="text" id="co-city" name="city" placeholder="Austin" required>
+          </div>
+          <div class="form-field">
+            <label for="co-state">State *</label>
+            <input type="text" id="co-state" name="state" placeholder="TX" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="co-zip">ZIP / Postal Code *</label>
+            <input type="text" id="co-zip" name="zip" placeholder="78701" required>
+          </div>
+          <div class="form-field">
+            <label for="co-country">Country *</label>
+            <input type="text" id="co-country" name="country" placeholder="US" value="US" required>
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="cardElement">Card Details *</label>
+          <div id="cardElement" style="padding:12px;border:1px solid var(--border);border-radius:8px;background:var(--card)"></div>
+          <span class="field-error" id="cardErrors" style="color:#dc2626;font-size:0.85rem"></span>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="checkoutPayBtn">Pay Now</button>
+        <p class="form-message" id="checkoutFeedback"></p>
+      </form>
+    </div>
+    <div>
+      <div class="contact-info-card fade-up">
+        <h2 style="margin-top:0">Order Summary</h2>
+        <div id="checkoutSummary"><div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading your cart…</p></div></div>
+      </div>
+    </div>
   </div>
-  <div class="pd-tab-panel active" id="tab-specs">
-    <table class="specs-table"><tbody id="pdSpecsTable"></tbody></table>
-  </div>
-  <div class="pd-tab-panel" id="tab-reviews">
-    <div class="review-grid" id="pdReviews"></div>
-  </div>
-
-  <div class="divider"></div>
-
-  <div class="section-head">
-    <span class="eyebrow">You May Also Like</span>
-    <h2>Related Products</h2>
-  </div>
-  <div class="product-grid" id="relatedGrid"></div>
 </main>
 
 <footer class="site-footer">
@@ -76,51 +110,14 @@
     <div class="footer-about">
       <a href="index.html" class="logo"><span class="logo-mark"><i class="fa-solid fa-bolt"></i></span>Tech<span style="color:#fff">Nova</span></a>
       <p>Your trusted destination for laptops, desktops, components, and accessories from the world's leading technology brands.</p>
-      <div class="footer-social">
-        <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-        <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-        <a href="#" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
-        <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
-      </div>
     </div>
     <div>
       <h4>Quick Links</h4>
       <ul class="footer-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="products.html">Products</a></li>
-        <li><a href="about.html">About Us</a></li>
-        <li><a href="contact.html">Contact</a></li>
-        <li><a href="faq.html">FAQ</a></li>
-      </ul>
-    </div>
-    <div>
-      <h4>Categories</h4>
-      <ul class="footer-links">
-        <li><a href="products.html?category=gaming-laptops">Gaming Laptops</a></li>
-        <li><a href="products.html?category=desktop-pcs">Desktop PCs</a></li>
-        <li><a href="products.html?category=monitors">Monitors</a></li>
-        <li><a href="products.html?category=graphics-cards">Graphics Cards</a></li>
-        <li><a href="products.html?category=accessories">Accessories</a></li>
-      </ul>
-    </div>
-    <div>
-      <h4>Customer Service</h4>
-      <ul class="footer-links">
         <li><a href="cart.html">Cart</a></li>
-        <li><a href="wishlist.html">Wishlist</a></li>
-        <li><a href="faq.html">Shipping &amp; Returns</a></li>
-        <li><a href="contact.html">Track Order</a></li>
-        <li><a href="faq.html">Warranty</a></li>
       </ul>
-    </div>
-    <div>
-      <h4>Newsletter</h4>
-      <p style="font-size:0.88rem;color:rgba(255,255,255,0.65)">Subscribe for deals and product drops.</p>
-      <form class="newsletter-form" style="flex-direction:column;align-items:stretch">
-        <input type="email" placeholder="Email address" required aria-label="Email address">
-        <button type="submit" class="btn btn-primary btn-sm">Subscribe</button>
-        <span class="form-message"></span>
-      </form>
     </div>
   </div>
   <div class="container footer-bottom">
@@ -133,13 +130,7 @@
 
 <button class="back-to-top" id="backToTop" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
-<div class="modal" id="quickViewModal">
-  <div class="modal-panel">
-    <button class="modal-close" data-close-modal aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
-    <div id="quickViewBody"></div>
-  </div>
-</div>
-
+<script src="https://js.stripe.com/v3/"></script>
 <script src="js/config.js"></script>
 <script src="js/api.js"></script>
 <script src="js/auth.js"></script>
@@ -147,16 +138,7 @@
 <script src="js/cart.js"></script>
 <script src="js/wishlist.js"></script>
 <script src="js/search.js"></script>
+<script src="js/checkout.js"></script>
 <script src="js/app.js"></script>
-<script>
-  document.querySelectorAll(".pd-tab-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".pd-tab-btn").forEach((b) => b.classList.remove("active"));
-      document.querySelectorAll(".pd-tab-panel").forEach((p) => p.classList.remove("active"));
-      btn.classList.add("active");
-      document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
-    });
-  });
-</script>
 </body>
 </html>

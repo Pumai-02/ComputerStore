@@ -668,3 +668,7 @@ input[type="range"] { width: 100%; accent-color: var(--primary); padding: 0; bor
 .text-center { text-align: center; }
 .mt-lg { margin-top: 48px; }
 .divider { height: 1px; background: var(--border); margin: 60px 0; }
+
+/* ---- Auth / checkout additions --------------------------------------- */
+.field-error { display: block; color: #dc2626; font-size: 0.82rem; margin-top: 4px; min-height: 1em; }
+.form-field input.invalid { border-color: #dc2626; }

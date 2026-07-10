@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Product Details — TechNova Computer Store</title>
+<title>Create Account — TechNova Computer Store</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="icon" type="image/svg+xml" href="images/icons/favicon.svg">
@@ -19,7 +19,7 @@
     <a href="index.html" class="logo"><span class="logo-mark"><i class="fa-solid fa-bolt"></i></span>Tech<span>Nova</span></a>
     <nav class="nav-menu" id="navMenu">
       <a href="index.html">Home</a>
-      <a href="products.html" class="active">Products</a>
+      <a href="products.html">Products</a>
       <a href="products.html#categories">Categories</a>
       <a href="products.html?category=gaming-laptops">Gaming</a>
       <a href="index.html#deals">Deals</a>
@@ -48,27 +48,45 @@
   </div>
 </div>
 
+<div class="page-banner">
+  <nav class="breadcrumb"><a href="index.html">Home</a> / <span>Create Account</span></nav>
+  <h1>Create Your Account</h1>
+</div>
+
 <main class="section container">
-  <div class="pd-layout" id="productDetails"></div>
-
-  <div class="pd-tabs">
-    <button class="pd-tab-btn active" data-tab="specs">Specifications</button>
-    <button class="pd-tab-btn" data-tab="reviews">Reviews</button>
+  <div class="contact-layout" style="grid-template-columns:1fr; max-width:520px; margin:0 auto">
+    <div class="contact-form-card fade-up">
+      <h2>Join TechNova</h2>
+      <p>Already have an account? <a href="login.html">Log in</a> instead.</p>
+      <form id="registerForm" novalidate>
+        <div class="form-field">
+          <label for="rg-name">Full Name *</label>
+          <input type="text" id="rg-name" name="name" placeholder="Jane Doe" required>
+        </div>
+        <div class="form-field">
+          <label for="rg-email">Email Address *</label>
+          <input type="email" id="rg-email" name="email" placeholder="jane@example.com" required>
+        </div>
+        <div class="form-field">
+          <label for="rg-phone">Phone Number</label>
+          <input type="tel" id="rg-phone" name="phone" placeholder="+1 (555) 000-0000">
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="rg-password">Password *</label>
+            <input type="password" id="rg-password" name="password" placeholder="At least 8 characters" required minlength="8">
+          </div>
+          <div class="form-field">
+            <label for="rg-password-confirm">Confirm Password *</label>
+            <input type="password" id="rg-password-confirm" name="password_confirmation" placeholder="Repeat password" required minlength="8">
+            <span class="field-error"></span>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+        <p class="form-message" id="registerFeedback"></p>
+      </form>
+    </div>
   </div>
-  <div class="pd-tab-panel active" id="tab-specs">
-    <table class="specs-table"><tbody id="pdSpecsTable"></tbody></table>
-  </div>
-  <div class="pd-tab-panel" id="tab-reviews">
-    <div class="review-grid" id="pdReviews"></div>
-  </div>
-
-  <div class="divider"></div>
-
-  <div class="section-head">
-    <span class="eyebrow">You May Also Like</span>
-    <h2>Related Products</h2>
-  </div>
-  <div class="product-grid" id="relatedGrid"></div>
 </main>
 
 <footer class="site-footer">
@@ -133,13 +151,6 @@
 
 <button class="back-to-top" id="backToTop" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
-<div class="modal" id="quickViewModal">
-  <div class="modal-panel">
-    <button class="modal-close" data-close-modal aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
-    <div id="quickViewBody"></div>
-  </div>
-</div>
-
 <script src="js/config.js"></script>
 <script src="js/api.js"></script>
 <script src="js/auth.js"></script>
@@ -148,15 +159,5 @@
 <script src="js/wishlist.js"></script>
 <script src="js/search.js"></script>
 <script src="js/app.js"></script>
-<script>
-  document.querySelectorAll(".pd-tab-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".pd-tab-btn").forEach((b) => b.classList.remove("active"));
-      document.querySelectorAll(".pd-tab-panel").forEach((p) => p.classList.remove("active"));
-      btn.classList.add("active");
-      document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
-    });
-  });
-</script>
 </body>
 </html>

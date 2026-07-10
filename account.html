@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Product Details — TechNova Computer Store</title>
+<title>My Account — TechNova Computer Store</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="icon" type="image/svg+xml" href="images/icons/favicon.svg">
@@ -19,7 +19,7 @@
     <a href="index.html" class="logo"><span class="logo-mark"><i class="fa-solid fa-bolt"></i></span>Tech<span>Nova</span></a>
     <nav class="nav-menu" id="navMenu">
       <a href="index.html">Home</a>
-      <a href="products.html" class="active">Products</a>
+      <a href="products.html">Products</a>
       <a href="products.html#categories">Categories</a>
       <a href="products.html?category=gaming-laptops">Gaming</a>
       <a href="index.html#deals">Deals</a>
@@ -31,7 +31,7 @@
       <a href="wishlist.html" class="icon-btn icon-btn-wrap" aria-label="Wishlist"><i class="fa-regular fa-heart"></i><span class="badge-dot wishlist-count">0</span></a>
       <a href="cart.html" class="icon-btn icon-btn-wrap" aria-label="Cart"><i class="fa-solid fa-cart-shopping"></i><span class="badge-dot cart-count">0</span></a>
       <button class="icon-btn theme-toggle" aria-label="Toggle dark mode"><i class="fa-solid fa-moon"></i></button>
-      <a href="login.html" class="icon-btn" id="accountLink" aria-label="Account"><i class="fa-regular fa-user"></i></a>
+      <a href="login.html" class="icon-btn" id="accountLink" aria-label="Account"><i class="fa-solid fa-user"></i></a>
       <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
     </div>
   </div>
@@ -48,27 +48,36 @@
   </div>
 </div>
 
-<main class="section container">
-  <div class="pd-layout" id="productDetails"></div>
+<div class="page-banner">
+  <nav class="breadcrumb"><a href="index.html">Home</a> / <span>My Account</span></nav>
+  <h1>My Account</h1>
+</div>
 
-  <div class="pd-tabs">
-    <button class="pd-tab-btn active" data-tab="specs">Specifications</button>
-    <button class="pd-tab-btn" data-tab="reviews">Reviews</button>
+<main class="section container" id="accountPage">
+  <div class="contact-layout">
+    <div>
+      <div class="contact-form-card fade-up">
+        <h2>Order History</h2>
+        <p>Everything you've ordered from TechNova.</p>
+        <div id="acctOrders"></div>
+      </div>
+    </div>
+    <div>
+      <div class="contact-info-card fade-up">
+        <div class="contact-info-row">
+          <span class="icon-circle"><i class="fa-solid fa-user"></i></span>
+          <div><strong>Name</strong><p style="margin:2px 0 0" id="acctName"></p></div>
+        </div>
+        <div class="contact-info-row">
+          <span class="icon-circle"><i class="fa-solid fa-envelope"></i></span>
+          <div><strong>Email</strong><p style="margin:2px 0 0" id="acctEmail"></p></div>
+        </div>
+        <button class="btn btn-outline btn-block" data-logout style="margin-top:10px">
+          <i class="fa-solid fa-right-from-bracket"></i> Log Out
+        </button>
+      </div>
+    </div>
   </div>
-  <div class="pd-tab-panel active" id="tab-specs">
-    <table class="specs-table"><tbody id="pdSpecsTable"></tbody></table>
-  </div>
-  <div class="pd-tab-panel" id="tab-reviews">
-    <div class="review-grid" id="pdReviews"></div>
-  </div>
-
-  <div class="divider"></div>
-
-  <div class="section-head">
-    <span class="eyebrow">You May Also Like</span>
-    <h2>Related Products</h2>
-  </div>
-  <div class="product-grid" id="relatedGrid"></div>
 </main>
 
 <footer class="site-footer">
@@ -133,13 +142,6 @@
 
 <button class="back-to-top" id="backToTop" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
-<div class="modal" id="quickViewModal">
-  <div class="modal-panel">
-    <button class="modal-close" data-close-modal aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
-    <div id="quickViewBody"></div>
-  </div>
-</div>
-
 <script src="js/config.js"></script>
 <script src="js/api.js"></script>
 <script src="js/auth.js"></script>
@@ -148,15 +150,5 @@
 <script src="js/wishlist.js"></script>
 <script src="js/search.js"></script>
 <script src="js/app.js"></script>
-<script>
-  document.querySelectorAll(".pd-tab-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".pd-tab-btn").forEach((b) => b.classList.remove("active"));
-      document.querySelectorAll(".pd-tab-panel").forEach((p) => p.classList.remove("active"));
-      btn.classList.add("active");
-      document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
-    });
-  });
-</script>
 </body>
 </html>

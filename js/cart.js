@@ -1,55 +1,44 @@
 /* ==========================================================================
-   TechNova — Cart (Local Storage)
+   TechNova — Cart (API-backed)
+   Cart requires a logged-in user on this backend (no guest cart), so
+   every mutating action checks requireLogin() first.
    ========================================================================== */
 
-const CART_KEY = "technova_cart";
-const SHIPPING_FLAT = 15;
-const FREE_SHIPPING_THRESHOLD = 500;
+const SHIPPING_FLAT = 9.99;
+const FREE_SHIPPING_THRESHOLD = 100;
 
-function getCart() {
-  try {
-    return JSON.parse(localStorage.getItem(CART_KEY)) || [];
-  } catch {
-    return [];
+let CART_ITEMS = []; // raw items from GET /cart: [{ id, product_id, quantity, product }]
+
+async function loadCart() {
+  if (!isLoggedIn()) {
+    CART_ITEMS = [];
+    return;
   }
-}
-
-function saveCart(cart) {
-  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  try {
+    const res = await api.get("/cart");
+    CART_ITEMS = res.items || [];
+  } catch (err) {
+    console.error("Failed to load cart:", err);
+    CART_ITEMS = [];
+  }
   updateCartCount();
 }
 
-function addToCart(productId, qty = 1) {
-  const cart = getCart();
-  const existing = cart.find((item) => item.id === productId);
-  if (existing) {
-    existing.qty += qty;
-  } else {
-    cart.push({ id: productId, qty });
-  }
-  saveCart(cart);
-  showToast("Added to cart");
+function cartLinesWithData() {
+  return CART_ITEMS.map((item) => ({
+    cartItemId: item.id,
+    id: item.product_id,
+    qty: item.quantity,
+    product: normalizeProduct(item.product),
+  }));
 }
 
-function removeFromCart(productId) {
-  saveCart(getCart().filter((item) => item.id !== productId));
-}
-
-function updateCartQty(productId, qty) {
-  const cart = getCart();
-  const item = cart.find((i) => i.id === productId);
-  if (item) {
-    item.qty = Math.max(1, qty);
-    saveCart(cart);
-  }
-}
-
-function clearCart() {
-  saveCart([]);
+function cartSubtotal() {
+  return cartLinesWithData().reduce((sum, line) => sum + line.product.price * line.qty, 0);
 }
 
 function cartCount() {
-  return getCart().reduce((sum, item) => sum + item.qty, 0);
+  return CART_ITEMS.reduce((sum, item) => sum + item.quantity, 0);
 }
 
 function updateCartCount() {
@@ -60,17 +49,43 @@ function updateCartCount() {
   });
 }
 
-function cartLinesWithData() {
-  return getCart()
-    .map((item) => {
-      const product = PRODUCTS.find((p) => p.id === item.id);
-      return product ? { ...item, product } : null;
-    })
-    .filter(Boolean);
+async function addToCart(productId, qty = 1) {
+  if (!requireLogin("Please log in to add items to your cart.")) return;
+  try {
+    await api.post("/cart", { product_id: productId, quantity: qty });
+    await loadCart();
+    showToast("Added to cart");
+    if (document.getElementById("cartItems")) renderCartPage();
+  } catch (err) {
+    showToast(err.message || "Couldn't add that to your cart.");
+  }
 }
 
-function cartSubtotal() {
-  return cartLinesWithData().reduce((sum, line) => sum + line.product.price * line.qty, 0);
+async function removeFromCart(cartItemId) {
+  try {
+    await api.delete(`/cart/${cartItemId}`);
+    await loadCart();
+  } catch (err) {
+    showToast(err.message || "Couldn't remove that item.");
+  }
+}
+
+async function updateCartQty(cartItemId, qty) {
+  try {
+    await api.patch(`/cart/${cartItemId}`, { quantity: Math.max(1, qty) });
+    await loadCart();
+  } catch (err) {
+    showToast(err.message || "Couldn't update quantity.");
+  }
+}
+
+async function clearCart() {
+  try {
+    await api.delete("/cart");
+    await loadCart();
+  } catch (err) {
+    showToast(err.message || "Couldn't clear your cart.");
+  }
 }
 
 function renderCartPage() {
@@ -79,12 +94,25 @@ function renderCartPage() {
   const emptyEl = document.getElementById("cartEmpty");
   if (!container) return;
 
+  if (!isLoggedIn()) {
+    container.innerHTML = "";
+    if (summaryEl) summaryEl.style.display = "none";
+    if (emptyEl) {
+      emptyEl.style.display = "flex";
+      emptyEl.innerHTML = `<i class="fa-solid fa-circle-user" style="font-size:2rem"></i><p>Log in to see your cart.</p><a href="login.html?redirect=cart.html" class="btn btn-primary">Log In</a>`;
+    }
+    return;
+  }
+
   const lines = cartLinesWithData();
 
   if (!lines.length) {
     container.innerHTML = "";
     if (summaryEl) summaryEl.style.display = "none";
-    if (emptyEl) emptyEl.style.display = "flex";
+    if (emptyEl) {
+      emptyEl.style.display = "flex";
+      emptyEl.innerHTML = `<i class="fa-solid fa-cart-shopping" style="font-size:2rem"></i><p>Your cart is empty.</p><a href="products.html" class="btn btn-primary">Shop Products</a>`;
+    }
     return;
   }
 
@@ -92,27 +120,29 @@ function renderCartPage() {
   if (summaryEl) summaryEl.style.display = "block";
 
   container.innerHTML = lines
-    .map(
-      (line) => `
-    <div class="cart-line" data-id="${line.id}">
+    .map((line) => {
+      const url = productImageUrl(line.product);
+      const img = url ? `<img src="${url}" alt="${line.product.name}" loading="lazy" onerror="this.remove()">` : "";
+      return `
+    <div class="cart-line" data-cart-item-id="${line.cartItemId}">
       <div class="cart-line-media" style="background:${line.product.color}">
-        <img src="${productImageUrl(line.product)}" alt="${line.product.name}" loading="lazy" onerror="this.remove()">
+        ${img}
         <i class="fa-solid ${categoryIcon(line.product.category)}"></i>
       </div>
       <div class="cart-line-info">
         <span class="product-brand">${line.product.brand}</span>
-        <h3><a href="product-details.html?id=${line.id}">${line.product.name}</a></h3>
+        <h3><a href="product-details.html?slug=${line.product.slug}">${line.product.name}</a></h3>
         <p class="product-specs">${line.product.specs}</p>
-        <button class="link-btn remove-line" data-id="${line.id}"><i class="fa-solid fa-trash"></i> Remove</button>
+        <button class="link-btn remove-line" data-cart-item-id="${line.cartItemId}"><i class="fa-solid fa-trash"></i> Remove</button>
       </div>
       <div class="cart-line-qty">
-        <button class="qty-btn qty-minus" data-id="${line.id}" aria-label="Decrease quantity">−</button>
-        <input type="number" min="1" value="${line.qty}" class="qty-input" data-id="${line.id}" aria-label="Quantity">
-        <button class="qty-btn qty-plus" data-id="${line.id}" aria-label="Increase quantity">+</button>
+        <button class="qty-btn qty-minus" data-cart-item-id="${line.cartItemId}" data-qty="${line.qty}" aria-label="Decrease quantity">−</button>
+        <input type="number" min="1" value="${line.qty}" class="qty-input" data-cart-item-id="${line.cartItemId}" aria-label="Quantity">
+        <button class="qty-btn qty-plus" data-cart-item-id="${line.cartItemId}" data-qty="${line.qty}" aria-label="Increase quantity">+</button>
       </div>
       <div class="cart-line-price">${formatPrice(line.product.price * line.qty)}</div>
-    </div>`
-    )
+    </div>`;
+    })
     .join("");
 
   const subtotal = cartSubtotal();
@@ -126,32 +156,29 @@ function renderCartPage() {
   }
 
   container.querySelectorAll(".remove-line").forEach((btn) =>
-    btn.addEventListener("click", () => {
-      removeFromCart(btn.dataset.id);
+    btn.addEventListener("click", async () => {
+      await removeFromCart(btn.dataset.cartItemId);
       renderCartPage();
     })
   );
   container.querySelectorAll(".qty-plus").forEach((btn) =>
-    btn.addEventListener("click", () => {
-      const cart = getCart();
-      const item = cart.find((i) => i.id === btn.dataset.id);
-      updateCartQty(btn.dataset.id, item.qty + 1);
+    btn.addEventListener("click", async () => {
+      await updateCartQty(btn.dataset.cartItemId, parseInt(btn.dataset.qty, 10) + 1);
       renderCartPage();
     })
   );
   container.querySelectorAll(".qty-minus").forEach((btn) =>
-    btn.addEventListener("click", () => {
-      const cart = getCart();
-      const item = cart.find((i) => i.id === btn.dataset.id);
-      if (item.qty > 1) {
-        updateCartQty(btn.dataset.id, item.qty - 1);
+    btn.addEventListener("click", async () => {
+      const qty = parseInt(btn.dataset.qty, 10);
+      if (qty > 1) {
+        await updateCartQty(btn.dataset.cartItemId, qty - 1);
         renderCartPage();
       }
     })
   );
   container.querySelectorAll(".qty-input").forEach((input) =>
-    input.addEventListener("change", () => {
-      updateCartQty(input.dataset.id, parseInt(input.value) || 1);
+    input.addEventListener("change", async () => {
+      await updateCartQty(input.dataset.cartItemId, parseInt(input.value, 10) || 1);
       renderCartPage();
     })
   );
@@ -161,25 +188,31 @@ document.addEventListener("click", (e) => {
   const addBtn = e.target.closest(".add-to-cart-btn");
   if (addBtn) {
     e.preventDefault();
-    addToCart(addBtn.dataset.id, 1);
+    addToCart(parseInt(addBtn.dataset.id, 10), 1);
   }
   const emptyBtn = e.target.closest("#emptyCartBtn");
   if (emptyBtn) {
-    clearCart();
-    renderCartPage();
+    clearCart().then(renderCartPage);
   }
   const checkoutBtn = e.target.closest("#checkoutBtn");
   if (checkoutBtn) {
     e.preventDefault();
+    if (!requireLogin("Please log in to check out.")) return;
     if (cartCount() === 0) {
       showToast("Your cart is empty");
     } else {
-      document.getElementById("checkoutModal")?.classList.add("open");
+      window.location.href = "checkout.html";
     }
   }
 });
 
-document.addEventListener("DOMContentLoaded", () => {
+const cartReady = (async () => {
+  await catalogReady;
+  await loadCart();
+})();
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await cartReady;
   updateCartCount();
   renderCartPage();
 });
