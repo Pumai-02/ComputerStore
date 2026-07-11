@@ -112,7 +112,7 @@ async function renderDashboard(content) {
       <div class="stat-card"><i class="fa-solid fa-sack-dollar"></i><div class="stat-label">Total Revenue</div><div class="stat-value">${money(d.total_revenue)}</div></div>
       <div class="stat-card"><i class="fa-solid fa-receipt"></i><div class="stat-label">Total Orders</div><div class="stat-value">${d.total_orders}</div></div>
       <div class="stat-card"><i class="fa-solid fa-box"></i><div class="stat-label">Total Products</div><div class="stat-value">${d.total_products}</div></div>
-      <div class="stat-card"><i class="fa-solid fa-users"></i><div class="stat-label">User</div><div class="stat-value">${d.total_customers}</div></div>
+      <div class="stat-card"><i class="fa-solid fa-users"></i><div class="stat-label">Total Customers</div><div class="stat-value">${d.total_customers}</div></div>
       <div class="stat-card"><i class="fa-solid fa-hourglass-half"></i><div class="stat-label">Pending Orders</div><div class="stat-value">${d.pending_orders}</div></div>
       <div class="stat-card"><i class="fa-solid fa-triangle-exclamation"></i><div class="stat-label">Low Stock</div><div class="stat-value">${d.low_stock_products}</div></div>
     </div>
@@ -529,7 +529,7 @@ async function openOrderModal(orderId, currentStatusFilter) {
       }
       <table class="admin-table">
         <thead><tr><th>Item</th><th>Qty</th><th>Price</th></tr></thead>
-        <tbody>${items.map((i) => `<tr><td>${esc(i.product_name)}</td><td>${i.quantity}</td><td>${money(i.price)}</td></tr>`).join("")}</tbody>
+        <tbody>${items.map((i) => `<tr><td>${esc(i.product_name)}</td><td>${i.quantity}</td><td>${money(i.product_price)}</td></tr>`).join("")}</tbody>
       </table>
       <div class="summary-row total" style="margin-top:8px"><span>Total</span><span>${money(o.total)}</span></div>
       <div class="admin-field" style="margin-top:16px">
