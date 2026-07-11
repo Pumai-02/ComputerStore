@@ -12,5 +12,5 @@
       server-side in the backend's .env file.
    ========================================================================== */
 
-const API_BASE_URL = "http://localhost:8000/api";
-const STRIPE_PUBLISHABLE_KEY = "pk_test_REPLACE_WITH_YOUR_STRIPE_PUBLISHABLE_KEY";
+const API_BASE_URL = "http://127.0.0.1:8000/api";
+const STRIPE_PUBLISHABLE_KEY = "#";

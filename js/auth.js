@@ -88,7 +88,7 @@ function initRegisterForm() {
       );
       setSession(res.token, res.user);
       showToast(`Welcome to TechNova, ${res.user.name}!`);
-      window.location.href = "index.html";
+      window.location.href = "account.html";
     } catch (err) {
       if (err.data?.errors) {
         Object.entries(err.data.errors).forEach(([field, messages]) => {
@@ -143,8 +143,12 @@ async function initAccountPage() {
   const user = getCurrentUser();
   const nameEl = document.getElementById("acctName");
   const emailEl = document.getElementById("acctEmail");
+  const adminLink = document.getElementById("acctAdminLink");
   if (nameEl) nameEl.textContent = user?.name || "";
   if (emailEl) emailEl.textContent = user?.email || "";
+  if (adminLink) {
+    adminLink.style.display = user?.role === "admin" ? "block" : "none";
+  }
 
   const ordersEl = document.getElementById("acctOrders");
   if (!ordersEl) return;

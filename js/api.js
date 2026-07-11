@@ -51,7 +51,9 @@ async function apiRequest(path, { method = "GET", body, auth = true, params } = 
   const headers = {
     Accept: "application/json",
   };
-  if (body !== undefined) headers["Content-Type"] = "application/json";
+  if (body !== undefined && !(body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
+  }
   if (auth) {
     const token = getToken();
     if (token) headers.Authorization = `Bearer ${token}`;
@@ -62,7 +64,12 @@ async function apiRequest(path, { method = "GET", body, auth = true, params } = 
     response = await fetch(url, {
       method,
       headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body:
+        body === undefined
+          ? undefined
+          : body instanceof FormData
+          ? body
+          : JSON.stringify(body),
     });
   } catch (networkErr) {
     const err = new Error(
