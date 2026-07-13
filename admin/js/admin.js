@@ -17,6 +17,7 @@ let categoriesCache = [];
 
 function showToast(message) {
   const el = document.getElementById("adminToast");
+  if (!el) return;
   el.textContent = message;
   el.classList.add("show");
   clearTimeout(showToast._t);
@@ -118,20 +119,6 @@ async function renderDashboard(content) {
     </div>
     <div class="admin-panel">
       <h2>Recent Orders</h2>
-      ${
-        d.recent_orders?.length
-          ? `<table class="admin-table"><thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead><tbody>
-          ${d.recent_orders
-            .map(
-              (o) => `<tr><td>${esc(o.order_number)}</td><td>${esc(o.user?.name || "—")}</td><td>${money(o.total)}</td><td><span class="status-pill status-${o.status}">${o.status}</span></td></tr>`
-            )
-            .join("")}
-          </tbody></table>`
-          : `<div class="admin-empty"><i class="fa-solid fa-receipt"></i>No orders yet.</div>`
-      }
-    </div>
-    <div class="admin-panel">
-      <h2>Top Selling Products</h2>
       ${
         d.top_products?.length
           ? `<table class="admin-table"><thead><tr><th>Product</th><th>Units Sold</th></tr></thead><tbody>
@@ -294,40 +281,46 @@ function openProductModal(product) {
     const feedback = document.getElementById("productFormFeedback");
     const imagesRaw = document.getElementById("pf-images").value.trim();
     const imageFile = document.getElementById("pf-image-file").files[0];
-    let payload;
+    const payload = new FormData();
+    const categoryValue = document.getElementById("pf-category").value;
+
+    if (categoryValue) {
+      payload.append("category_id", parseInt(categoryValue, 10));
+    }
+    payload.append("name", document.getElementById("pf-name").value);
+    payload.append("sku", document.getElementById("pf-sku").value);
+    payload.append("description", document.getElementById("pf-description").value || "");
+    payload.append("price", parseFloat(document.getElementById("pf-price").value));
+
+    const salePriceValue = document.getElementById("pf-sale-price").value;
+    if (salePriceValue !== "") {
+      payload.append("sale_price", parseFloat(salePriceValue));
+    }
+
+    payload.append("stock", parseInt(document.getElementById("pf-stock").value, 10));
+
+    const imageUrlValue = document.getElementById("pf-image").value.trim();
+    if (imageUrlValue) {
+      payload.append("image", imageUrlValue);
+    }
 
     if (imageFile) {
-      payload = new FormData();
-      payload.append("category_id", parseInt(document.getElementById("pf-category").value, 10));
-      payload.append("name", document.getElementById("pf-name").value);
-      payload.append("sku", document.getElementById("pf-sku").value);
-      payload.append("description", document.getElementById("pf-description").value || "");
-      payload.append("price", parseFloat(document.getElementById("pf-price").value));
-      payload.append("sale_price", document.getElementById("pf-sale-price").value ? parseFloat(document.getElementById("pf-sale-price").value) : "");
-      payload.append("stock", parseInt(document.getElementById("pf-stock").value, 10));
-      payload.append("image_file", imageFile);
-      payload.append("images", imagesRaw ? imagesRaw.split(",").map((s) => s.trim()).filter(Boolean).join(",") : "");
-      payload.append("is_featured", document.getElementById("pf-featured").checked ? "1" : "0");
-      payload.append("is_active", document.getElementById("pf-active").checked ? "1" : "0");
-    } else {
-      payload = {
-        category_id: parseInt(document.getElementById("pf-category").value, 10),
-        name: document.getElementById("pf-name").value,
-        sku: document.getElementById("pf-sku").value,
-        description: document.getElementById("pf-description").value || null,
-        price: parseFloat(document.getElementById("pf-price").value),
-        sale_price: document.getElementById("pf-sale-price").value ? parseFloat(document.getElementById("pf-sale-price").value) : null,
-        stock: parseInt(document.getElementById("pf-stock").value, 10),
-        image: document.getElementById("pf-image").value || null,
-        images: imagesRaw ? imagesRaw.split(",").map((s) => s.trim()).filter(Boolean) : [],
-        is_featured: document.getElementById("pf-featured").checked,
-        is_active: document.getElementById("pf-active").checked,
-      };
+      payload.append("image_file", imageFile, imageFile.name);
     }
+
+    const parsedImages = imagesRaw ? imagesRaw.split(",").map((s) => s.trim()).filter(Boolean).join(",") : "";
+    if (parsedImages) {
+      payload.append("images", parsedImages);
+    }
+
+    payload.append("is_featured", document.getElementById("pf-featured").checked ? "1" : "0");
+    payload.append("is_active", document.getElementById("pf-active").checked ? "1" : "0");
 
     try {
       if (isEdit) {
-        await api.patch(`/admin/products/${product.id}`, payload);
+        // Laravel requires _method field for PATCH with FormData
+        payload.append("_method", "PATCH");
+        await api.post(`/admin/products/${product.id}`, payload);
         showToast("Product updated");
       } else {
         await api.post("/admin/products", payload);
@@ -336,7 +329,8 @@ function openProductModal(product) {
       closeModal();
       renderProducts(document.getElementById("adminContent"));
     } catch (err) {
-      feedback.textContent = err.message;
+      const message = err?.data?.errors ? Object.values(err.data.errors).flat().join(" \n") : err.message;
+      feedback.textContent = message;
       feedback.className = "form-message error";
     }
   });
@@ -436,22 +430,21 @@ function openCategoryModal(category) {
     e.preventDefault();
     const feedback = document.getElementById("categoryFormFeedback");
     const imageFile = document.getElementById("cf-image-file").files[0];
-    let payload;
+    const payload = new FormData();
+
+    payload.append("name", document.getElementById("cf-name").value);
+    payload.append("description", document.getElementById("cf-description").value || "");
+
+    const categoryImageUrlValue = document.getElementById("cf-image").value.trim();
+    if (categoryImageUrlValue) {
+      payload.append("image", categoryImageUrlValue);
+    }
 
     if (imageFile) {
-      payload = new FormData();
-      payload.append("name", document.getElementById("cf-name").value);
-      payload.append("description", document.getElementById("cf-description").value || "");
-      payload.append("image_file", imageFile);
-      payload.append("is_active", document.getElementById("cf-active").checked ? "1" : "0");
-    } else {
-      payload = {
-        name: document.getElementById("cf-name").value,
-        description: document.getElementById("cf-description").value || null,
-        image: document.getElementById("cf-image").value || null,
-        is_active: document.getElementById("cf-active").checked,
-      };
+      payload.append("image_file", imageFile, imageFile.name);
     }
+
+    payload.append("is_active", document.getElementById("cf-active").checked ? "1" : "0");
     try {
       if (isEdit) {
         await api.patch(`/admin/categories/${category.id}`, payload);
@@ -464,7 +457,8 @@ function openCategoryModal(category) {
       categoriesCache = [];
       renderCategories(document.getElementById("adminContent"));
     } catch (err) {
-      feedback.textContent = err.message;
+      const message = err?.data?.errors ? Object.values(err.data.errors).flat().join(" \n") : err.message;
+      feedback.textContent = message;
       feedback.className = "form-message error";
     }
   });
