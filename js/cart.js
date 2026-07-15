@@ -131,7 +131,7 @@ function renderCartPage() {
       </div>
       <div class="cart-line-info">
         <span class="product-brand">${line.product.brand}</span>
-        <h3><a href="product-details.html?slug=${line.product.slug}">${line.product.name}</a></h3>
+        <h3><a href="product-details.html#slug=${line.product.slug}">${line.product.name}</a></h3>
         <p class="product-specs">${line.product.specs}</p>
         <button class="link-btn remove-line" data-cart-item-id="${line.cartItemId}"><i class="fa-solid fa-trash"></i> Remove</button>
       </div>

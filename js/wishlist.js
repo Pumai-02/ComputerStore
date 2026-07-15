@@ -10,9 +10,13 @@ async function loadWishlist() {
     return;
   }
   try {
-    WISHLIST_ITEMS = await api.get("/wishlist");
+    const wishlist = await api.get("/wishlist");
+    WISHLIST_ITEMS = Array.isArray(wishlist) ? wishlist : wishlist.data || [];
   } catch (err) {
     console.error("Failed to load wishlist:", err);
+    WISHLIST_ITEMS = [];
+  }
+  if (!Array.isArray(WISHLIST_ITEMS)) {
     WISHLIST_ITEMS = [];
   }
   updateWishlistCount();

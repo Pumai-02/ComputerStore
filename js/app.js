@@ -17,6 +17,300 @@ function showToast(message) {
   toast._timer = setTimeout(() => toast.classList.remove("show"), 2400);
 }
 
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;");
+}
+
+const REVIEW_STORAGE_KEY = "technova_local_reviews";
+
+function loadLocalReviews() {
+  try {
+    return JSON.parse(localStorage.getItem(REVIEW_STORAGE_KEY) || "{}") || {};
+  } catch {
+    return {};
+  }
+}
+
+function saveLocalReviews(reviews) {
+  localStorage.setItem(REVIEW_STORAGE_KEY, JSON.stringify(reviews));
+}
+
+function getLocalReviewsForProduct(productId) {
+  const reviews = loadLocalReviews();
+  return Array.isArray(reviews[productId]) ? reviews[productId] : [];
+}
+
+function getLocalReviewForUser(productId, userId) {
+  if (!userId) return null;
+  return getLocalReviewsForProduct(productId).find((review) => String(review.userId) === String(userId)) || null;
+}
+
+function recordLocalReview(productId, rating, comment, userId) {
+  const reviews = loadLocalReviews();
+  const productReviews = Array.isArray(reviews[productId]) ? reviews[productId] : [];
+  const now = new Date().toISOString();
+  const existingIndex = userId ? productReviews.findIndex((review) => String(review.userId) === String(userId)) : -1;
+
+  const reviewRecord = {
+    id: existingIndex >= 0 ? productReviews[existingIndex].id : `${productId}_${userId || Math.random().toString(36).slice(2)}`,
+    userId: userId || null,
+    userName: getCurrentUser()?.name || "You",
+    rating: Number(rating),
+    comment: comment?.trim() || "",
+    created_at: existingIndex >= 0 ? productReviews[existingIndex].created_at : now,
+    updated_at: now,
+  };
+
+  if (existingIndex >= 0) {
+    productReviews[existingIndex] = reviewRecord;
+  } else {
+    productReviews.unshift(reviewRecord);
+  }
+
+  reviews[productId] = productReviews;
+  saveLocalReviews(reviews);
+  return reviewRecord;
+}
+
+function renderInteractiveStars(selected = 0) {
+  return [1, 2, 3, 4, 5]
+    .map(
+      (value) => `
+      <button class="review-star-btn ${value <= selected ? "active" : ""}" type="button" data-rating="${value}" aria-label="Rate ${value} stars">
+        <i class="${value <= selected ? "fa-solid fa-star" : "fa-regular fa-star"}"></i>
+      </button>`
+    )
+    .join("");
+}
+
+function formatReviewDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+}
+
+function renderReviewCard(review) {
+  const user = review.user || review.author || review.customer || {};
+  const name = user.name || review.user_name || review.name || "Anonymous";
+  const avatar = (name || "A").toString().trim().charAt(0).toUpperCase();
+  const rating = Number(review.rating || review.stars || 0);
+  const comment = review.comment || review.review || "";
+  const date = formatReviewDate(review.created_at || review.createdAt || review.updated_at || review.updatedAt);
+
+  return `
+  <div class="review-card fade-up">
+    <div class="review-header">
+      <span class="review-avatar">${avatar}</span>
+      <div>
+        <strong>${escapeHtml(name)}</strong>
+        <div class="stars">${starRating(rating)}</div>
+        ${date ? `<div class="rating-count">${escapeHtml(date)}</div>` : ""}
+      </div>
+    </div>
+    ${comment ? `<p>${escapeHtml(comment)}</p>` : ""}
+  </div>`;
+}
+
+function updateProductRatingSummary(product, average, count) {
+  const topStars = document.getElementById("pdTopRatingStars");
+  if (topStars) topStars.innerHTML = starRating(average);
+
+  const topCount = document.getElementById("pdTopRatingCount");
+  if (topCount) topCount.textContent = `(${count} ${count === 1 ? "review" : "reviews"})`;
+
+  const topAverage = document.getElementById("pdTopRatingAverage");
+  if (topAverage) topAverage.innerHTML = `Average Rating: <strong>${Number(average || 0).toFixed(1)}</strong>`;
+}
+
+async function fetchProductReviews(productId) {
+  if (!productId) return { reviews: [], average: 0, count: 0, userReview: null };
+
+  const attempts = [
+    () => api.get("/reviews", { product_id: productId, per_page: 50 }),
+  ];
+
+  let lastError;
+  for (const attempt of attempts) {
+    try {
+      const payload = await attempt();
+      const data = Array.isArray(payload) ? payload : payload.data || payload.reviews || payload.results || [];
+      const reviews = Array.isArray(data) ? data : [];
+      const normalizedReviews = reviews.map((review) => ({
+        ...review,
+        rating: Number(review.rating || review.stars || 0),
+      }));
+      const count = Number(payload.count || payload.total || normalizedReviews.length || 0);
+      const average = normalizedReviews.length
+        ? normalizedReviews.reduce((sum, review) => sum + review.rating, 0) / normalizedReviews.length
+        : Number(payload.average_rating || payload.average || 0);
+      const user = getCurrentUser();
+      const userReview = user
+        ? normalizedReviews.find((review) => String(review.user_id || review.user?.id || review.author_id || "") === String(user.id)) || null
+        : null;
+
+      return {
+        reviews: normalizedReviews,
+        average: Number(average || 0),
+        count: Number(count || normalizedReviews.length || 0),
+        userReview,
+      };
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  const localReviews = getLocalReviewsForProduct(productId).map((review) => ({
+    ...review,
+    rating: Number(review.rating || 0),
+  }));
+  const localCount = localReviews.length;
+  const localAverage = localCount
+    ? localReviews.reduce((sum, review) => sum + review.rating, 0) / localCount
+    : 0;
+  const user = getCurrentUser();
+  const userReview = user ? getLocalReviewForUser(productId, user.id) : null;
+
+  return {
+    reviews: localReviews,
+    average: Number(localAverage || 0),
+    count: localCount,
+    userReview,
+    backendError: lastError?.message || "Review service unavailable.",
+    localFallback: true,
+  };
+}
+
+async function submitProductReview(productId, rating, comment, existingReviewId) {
+  if (!isLoggedIn()) throw new Error("Please log in to rate this product.");
+  if (!rating || Number(rating) < 1 || Number(rating) > 5) throw new Error("Please select a rating from 1 to 5 stars.");
+
+  const body = { product_id: productId, rating: Number(rating), comment: comment?.trim() || "" };
+
+  if (existingReviewId) {
+    try {
+      return await api.patch(`/reviews/${encodeURIComponent(existingReviewId)}`, body);
+    } catch (err) {
+      try {
+        return await api.post(`/reviews/${encodeURIComponent(existingReviewId)}`, { ...body, _method: "PATCH" });
+      } catch (fallbackErr) {
+        // continue to local fallback below
+      }
+    }
+  }
+
+  const attempts = [
+    () => api.post("/reviews", body),
+  ];
+
+  let lastError;
+  for (const attempt of attempts) {
+    try {
+      return await attempt();
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  const user = getCurrentUser();
+  const localReview = recordLocalReview(productId, rating, comment, user?.id);
+  return localReview;
+}
+
+let activeReviewState = null;
+
+function renderReviewSection(product, reviewState) {
+  const reviewsEl = document.getElementById("pdReviews");
+  if (!reviewsEl) return;
+
+  const count = reviewState.count || reviewState.reviews.length || Number(product.reviews || 0);
+  const average = reviewState.average || Number(product.rating || 0);
+  const reviewsMarkup = reviewState.reviews.length
+    ? reviewState.reviews.map(renderReviewCard).join("")
+    : `<div class="empty-state"><i class="fa-solid fa-comments"></i><p>No reviews yet. Be the first to rate this product.</p></div>`;
+
+  reviewsEl.innerHTML = `
+    <div class="review-summary-card fade-up">
+      <div class="product-rating">
+        <span class="stars">${starRating(average)}</span>
+        <span class="rating-count">(${count} ${count === 1 ? "review" : "reviews"})</span>
+      </div>
+      <div class="pd-rating-average">Average Rating: <strong>${Number(average || 0).toFixed(1)}</strong></div>
+      ${isLoggedIn()
+        ? `
+        <div class="review-form-card">
+          <div class="review-stars" id="reviewStars">${renderInteractiveStars(reviewState.selectedRating || 0)}</div>
+          <textarea id="reviewComment" class="review-comment" placeholder="Share your experience (optional)">${escapeHtml(reviewState.comment || "")}</textarea>
+          <div class="review-actions">
+            <button class="btn btn-primary" id="submitReviewBtn">Submit Rating</button>
+          </div>
+          ${reviewState.localFallback ? `<div class="form-message success">Ratings are stored locally in this browser.</div>` : ""}
+          ${reviewState.feedbackText ? `<div class="form-message ${reviewState.feedbackType || "success"}" id="reviewFeedback">${escapeHtml(reviewState.feedbackText)}</div>` : ""}
+        </div>`
+        : `<div class="review-form-card"><p class="form-message error">Please log in to rate this product.</p></div>`}
+    </div>
+    <div class="review-grid">${reviewsMarkup}</div>`;
+
+  const starContainer = reviewsEl.querySelector("#reviewStars");
+  starContainer?.querySelectorAll(".review-star-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      reviewState.selectedRating = Number(btn.dataset.rating);
+      reviewState.comment = reviewsEl.querySelector("#reviewComment")?.value || "";
+      reviewState.feedbackText = "";
+      reviewState.feedbackType = "";
+      renderReviewSection(product, reviewState);
+    });
+  });
+
+  const submitBtn = reviewsEl.querySelector("#submitReviewBtn");
+  submitBtn?.addEventListener("click", async () => {
+    reviewState.comment = reviewsEl.querySelector("#reviewComment")?.value || "";
+    if (!reviewState.selectedRating) {
+      reviewState.feedbackText = "Please select a rating from 1 to 5 stars.";
+      reviewState.feedbackType = "error";
+      renderReviewSection(product, reviewState);
+      return;
+    }
+
+    submitBtn.disabled = true;
+    try {
+      await submitProductReview(product.id, reviewState.selectedRating, reviewState.comment, reviewState.userReview?.id);
+      await refreshReviews(product, "Thanks! Your rating has been submitted.", "success");
+      showToast("Rating submitted");
+    } catch (err) {
+      reviewState.feedbackText = err.message || "Could not submit your rating.";
+      reviewState.feedbackType = "error";
+      renderReviewSection(product, reviewState);
+      showToast(reviewState.feedbackText);
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+}
+
+async function refreshReviews(product, feedbackText = "", feedbackType = "") {
+  const reviewData = await fetchProductReviews(product.id);
+  activeReviewState = {
+    reviews: reviewData.reviews || [],
+    average: reviewData.average || Number(product.rating || 0),
+    count: reviewData.count || reviewData.reviews?.length || Number(product.reviews || 0),
+    selectedRating: reviewData.userReview?.rating || 0,
+    comment: reviewData.userReview?.comment || "",
+    userReview: reviewData.userReview || null,
+    backendError: reviewData.error || "",
+    feedbackText,
+    feedbackType,
+  };
+  product.rating = activeReviewState.average;
+  product.reviews = activeReviewState.count;
+  updateProductRatingSummary(product, activeReviewState.average, activeReviewState.count);
+  renderReviewSection(product, activeReviewState);
+}
+
 /* ---- Mobile nav --------------------------------------------------------*/
 function initNav() {
   const toggle = document.getElementById("navToggle");
@@ -255,7 +549,7 @@ function initQuickView() {
           ${stockLabel(product.stock)}
           <div class="quick-view-actions">
             <button class="btn btn-primary add-to-cart-btn" data-id="${product.id}"><i class="fa-solid fa-cart-plus"></i> Add to Cart</button>
-            <a class="btn btn-outline" href="product-details.html?slug=${product.slug}">View Full Details</a>
+            <a class="btn btn-outline" href="product-details.html#slug=${product.slug}">View Full Details</a>
           </div>
         </div>`;
       modal.classList.add("open");
@@ -317,19 +611,43 @@ const SAMPLE_REVIEWS = [
   { name: "Jonas K.", rating: 5, comment: "Build quality feels premium and the display is stunning in person." },
 ];
 
+function getProductSlugFromHash() {
+  const rawHash = window.location.hash.replace(/^#/, "");
+  if (!rawHash) return null;
+  const params = new URLSearchParams(rawHash.includes("=") ? rawHash : `slug=${rawHash}`);
+  return params.get("slug");
+}
+
+function getProductSlugFromPath() {
+  const path = window.location.pathname.replace(/\/+$/, "");
+  const segments = path.split("/").filter(Boolean);
+  if (!segments.length) return null;
+
+  const last = segments[segments.length - 1];
+  if (last && last !== "product-details" && last !== "product-details.html") {
+    return last;
+  }
+
+  if (segments.length >= 2 && segments[segments.length - 2].startsWith("product-details")) {
+    return last;
+  }
+
+  return null;
+}
+
 async function initProductDetailsPage() {
   const container = document.getElementById("productDetails");
   if (!container) return;
 
   const params = new URLSearchParams(window.location.search);
-  const slug = params.get("slug") || params.get("id");
+  const slug = params.get("slug") || params.get("id") || getProductSlugFromHash() || getProductSlugFromPath();
   container.innerHTML = `<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading product…</p></div>`;
 
   let product;
   try {
-    product = slug ? await fetchProductBySlug(slug) : PRODUCTS[0];
+    product = slug ? await fetchProductBySlug(slug) : null;
   } catch (err) {
-    product = PRODUCTS.find((p) => String(p.id) === String(slug)) || null;
+    product = PRODUCTS.find((p) => String(p.id) === String(slug) || String(p.slug) === String(slug)) || null;
   }
 
   if (!product) {
@@ -339,22 +657,31 @@ async function initProductDetailsPage() {
 
   document.title = `${product.name} — TechNova Computer Store`;
 
-  const galleryUrls = [0, 1, 2, 3].map((i) => productImageUrl(product, i));
-  const mainImg = galleryUrls[0]
-    ? `<img id="pdMainImg" src="${galleryUrls[0]}" alt="${product.name}" onerror="this.remove()">`
-    : "";
+  const galleryUrls = Array.isArray(product.images) ? product.images : [];
+  const combinedUrls = product.image ? [product.image, ...galleryUrls] : galleryUrls;
+
+  // Allow overriding the initial image via query param ?img=N
+  const requestedImg = params.has("img") ? Number(params.get("img")) : NaN;
+  const activeIndex = Number.isInteger(requestedImg) && requestedImg >= 0 && requestedImg < combinedUrls.length
+    ? requestedImg
+    : combinedUrls.findIndex((url) => typeof url === "string" && url.trim());
+  const mainImageUrl = activeIndex >= 0 ? combinedUrls[activeIndex] : "";
 
   container.innerHTML = `
     <div class="pd-gallery">
       <div class="pd-main-image" id="pdMainImage" style="background:${product.color}">
-        ${mainImg}
-        <i class="fa-solid ${categoryIcon(product.category)}"></i>
+        ${mainImageUrl ? `<img id="pdMainImg" src="${mainImageUrl}" alt="${product.name}" loading="eager">` : ""}
+        <div class="pd-image-fallback" id="pdMainFallback">
+          <i class="fa-solid fa-image"></i>
+          <span>Image unavailable</span>
+        </div>
+        <i class="fa-solid ${categoryIcon(product.category)} placeholder-icon"></i>
       </div>
       <div class="pd-thumbs">
-        ${galleryUrls
+        ${combinedUrls
           .map((url, i) => {
-            const thumbImg = url ? `<img src="${url}" alt="${product.name} view ${i + 1}" loading="lazy" onerror="this.remove()">` : "";
-            return `<button class="pd-thumb ${i === 0 ? "active" : ""}" style="background:${product.color}" data-idx="${i}">
+            const thumbImg = url ? `<img src="${url}" alt="${product.name} view ${i + 1}" loading="lazy">` : "";
+            return `<button class="pd-thumb ${i === activeIndex ? "active" : ""}" style="background:${product.color}" data-idx="${i}" ${!url ? "disabled" : ""}>
                 ${thumbImg}
                 <i class="fa-solid ${categoryIcon(product.category)}"></i>
               </button>`;
@@ -366,7 +693,11 @@ async function initProductDetailsPage() {
       <nav class="breadcrumb"><a href="index.html">Home</a> / <a href="products.html">Products</a> / <span>${product.name}</span></nav>
       <span class="product-brand">${product.brand}</span>
       <h1>${product.name}</h1>
-      <div class="product-rating"><span class="stars">${starRating(product.rating)}</span><span class="rating-count">(${product.reviews} reviews)</span></div>
+      <div class="product-rating">
+        <span class="stars" id="pdTopRatingStars">${starRating(product.rating)}</span>
+        <span class="rating-count" id="pdTopRatingCount">(${product.reviews} reviews)</span>
+      </div>
+      <div class="pd-rating-average" id="pdTopRatingAverage">Average Rating: <strong>${Number(product.rating || 0).toFixed(1)}</strong></div>
       <div class="product-price-row large">
         <span class="price-now">${formatPrice(product.price)}</span>
         ${product.oldPrice ? `<span class="price-old">${formatPrice(product.oldPrice)}</span>${badgeHtml(product)}` : ""}
@@ -410,28 +741,67 @@ async function initProductDetailsPage() {
     const input = document.getElementById("pdQty");
     input.value = Math.max(1, parseInt(input.value) - 1);
   });
+
+  const mainImg = document.getElementById("pdMainImg");
+  const mainFallback = document.getElementById("pdMainFallback");
+  let activeImageIdx = activeIndex >= 0 ? activeIndex : 0;
+
+  const setActiveThumbnail = (index) => {
+    container.querySelectorAll(".pd-thumb").forEach((thumb) => {
+      thumb.classList.toggle("active", Number(thumb.dataset.idx) === index);
+    });
+  };
+
+  const showFallbackImage = () => {
+    if (mainImg) mainImg.remove();
+    if (mainFallback) mainFallback.style.display = "flex";
+  };
+
+  const updateMainImage = (url, idx) => {
+    if (!mainImg || !url) {
+      showFallbackImage();
+      return;
+    }
+
+    activeImageIdx = idx;
+    setActiveThumbnail(idx);
+    if (mainFallback) mainFallback.style.display = "none";
+    mainImg.src = url;
+    mainImg.alt = `${product.name}`;
+    mainImg.classList.add("fade-in");
+    mainImg.addEventListener(
+      "animationend",
+      () => mainImg.classList.remove("fade-in"),
+      { once: true }
+    );
+  };
+
+  const trySetMainImage = (startIndex = 0) => {
+    for (let i = startIndex; i < combinedUrls.length; i += 1) {
+      const url = combinedUrls[i];
+      if (typeof url === "string" && url.trim()) {
+        updateMainImage(url, i);
+        return true;
+      }
+    }
+    showFallbackImage();
+    return false;
+  };
+
   container.querySelectorAll(".pd-thumb").forEach((thumb) =>
     thumb.addEventListener("click", () => {
-      container.querySelectorAll(".pd-thumb").forEach((t) => t.classList.remove("active"));
-      thumb.classList.add("active");
-      const mainImg = document.getElementById("pdMainImg");
       const idx = parseInt(thumb.dataset.idx, 10);
-      const url = productImageUrl(product, idx);
-      if (mainImg && url) mainImg.src = url;
+      const url = combinedUrls[idx];
+      if (!url) return;
+      updateMainImage(url, idx);
     })
   );
 
-  // Zoom effect
-  const mainImage = document.getElementById("pdMainImage");
-  mainImage?.addEventListener("mousemove", (e) => {
-    const rect = mainImage.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    mainImage.style.setProperty("--zoom-x", `${x}%`);
-    mainImage.style.setProperty("--zoom-y", `${y}%`);
-    mainImage.classList.add("zoomed");
-  });
-  mainImage?.addEventListener("mouseleave", () => mainImage.classList.remove("zoomed"));
+  if (mainImg) {
+    mainImg.addEventListener("error", () => {
+      trySetMainImage(activeImageIdx + 1);
+    });
+  }
 
   // Specs table
   const specsTable = document.getElementById("pdSpecsTable");
@@ -443,22 +813,7 @@ async function initProductDetailsPage() {
   }
 
   // Reviews
-  const reviewsEl = document.getElementById("pdReviews");
-  if (reviewsEl) {
-    reviewsEl.innerHTML = SAMPLE_REVIEWS.map(
-      (r) => `
-      <div class="review-card fade-up">
-        <div class="review-header">
-          <span class="review-avatar">${r.name.charAt(0)}</span>
-          <div>
-            <strong>${r.name}</strong>
-            <div class="stars">${starRating(r.rating)}</div>
-          </div>
-        </div>
-        <p>${r.comment}</p>
-      </div>`
-    ).join("");
-  }
+  await refreshReviews(product);
 
   // Related products
   const relatedGrid = document.getElementById("relatedGrid");
@@ -486,4 +841,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   updateCartCount();
   updateWishlistCount();
   initScrollReveal();
+  // Fallback: if the reveal didn't add any `.visible` classes (some browsers
+  // / environments may delay IntersectionObserver), ensure content isn't left
+  // invisible — make `.fade-up` elements visible after a short timeout.
+  setTimeout(() => {
+    try {
+      const anyVisible = document.querySelectorAll('.fade-up.visible, .slide-up.visible').length > 0;
+      if (!anyVisible) {
+        document.querySelectorAll('.fade-up, .slide-up').forEach((el) => el.classList.add('visible'));
+      }
+    } catch (e) {
+      // ignore — do not break page load
+    }
+  }, 450);
 });

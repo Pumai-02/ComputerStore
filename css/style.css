@@ -360,6 +360,12 @@ button:focus-visible, a:focus-visible {
 }
 .product-card:hover .quick-view { bottom: 0; }
 
+/* Mini thumbnails on product grids */
+.product-mini-thumbs { display:flex; gap:8px; margin:10px 16px; }
+.product-mini-thumb { width:56px; height:56px; display:inline-flex; align-items:center; justify-content:center; border-radius:10px; overflow:hidden; border:2px solid transparent; box-shadow:0 8px 20px rgba(15,23,42,0.06); background:var(--card); }
+.product-mini-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+.product-mini-thumb:hover { transform:translateY(-3px); }
+
 .product-body { padding: 18px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
 .product-brand { font-size: 0.76rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--primary); }
 .product-name { font-size: 1.02rem; margin: 0; }
@@ -420,6 +426,14 @@ button:focus-visible, a:focus-visible {
   color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-family: var(--font-heading);
 }
 .review-card p { margin: 0; font-size: 0.93rem; }
+.review-summary-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow-sm); margin-bottom: 24px; }
+.review-form-card { margin-top: 16px; display: flex; flex-direction: column; gap: 12px; }
+.review-stars { display: flex; gap: 8px; }
+.review-star-btn { background: transparent; border: none; color: #f59e0b; font-size: 1.2rem; cursor: pointer; padding: 0; }
+.review-star-btn.active { color: #f59e0b; }
+.review-comment { min-height: 96px; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; resize: vertical; background: var(--bg); color: var(--text); }
+.review-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pd-rating-average { font-size: 0.95rem; color: var(--text-muted); margin-top: 8px; }
 
 /* ---- Newsletter -----------------------------------------------------------*/
 .newsletter {
@@ -543,22 +557,38 @@ input[type="range"] { width: 100%; accent-color: var(--primary); padding: 0; bor
 
 /* ---- Product details page ------------------------------------------------*/
 .pd-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+.pd-gallery { display: grid; gap: 18px; }
 .pd-main-image {
   border-radius: var(--radius-lg); height: 420px; display: flex; align-items: center; justify-content: center;
-  overflow: hidden; position: relative; cursor: zoom-in;
+  overflow: hidden; position: relative; background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0.05));
 }
-.pd-main-image img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: transform 0.25s ease; transform-origin: var(--zoom-x, 50%) var(--zoom-y, 50%); }
+.pd-main-image img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: transform 0.25s ease, opacity 0.25s ease; transform-origin: var(--zoom-x, 50%) var(--zoom-y, 50%); }
+.pd-main-image img.fade-in { animation: fadeImage 0.28s ease both; }
 .pd-main-image.zoomed img { transform: scale(1.9); }
-.pd-main-image i { font-size: 6rem; color: rgba(255,255,255,0.85); transition: transform 0.2s ease; }
-.pd-main-image.zoomed i { transform: scale(1.5); }
-.pd-thumbs { display: flex; gap: 12px; margin-top: 14px; }
-.pd-thumb {
-  position: relative; width: 76px; height: 76px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center;
-  border: 2px solid transparent; opacity: 0.6; transition: all 0.2s ease; overflow: hidden;
+.pd-main-image .pd-image-fallback {
+  position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; color: rgba(255,255,255,0.9); background: rgba(15,23,42,0.45); text-align: center; padding: 24px;
 }
+.pd-main-image .pd-image-fallback i { font-size: 2rem; }
+.pd-main-image .pd-image-fallback span { font-size: 0.95rem; color: rgba(255,255,255,0.9); }
+.pd-main-image .placeholder-icon { position: relative; z-index: 0; font-size: 5rem; color: rgba(255,255,255,0.6); }
+.pd-thumbs { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
+.pd-thumb {
+  position: relative; width: 76px; height: 76px; min-width: 76px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center; border: 2px solid transparent;
+  background: rgba(255,255,255,0.95); box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+  color: rgba(17, 24, 39, 0.4); overflow: hidden; transition: transform 0.2s ease, opacity 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.pd-thumb:hover { transform: translateY(-2px); opacity: 1; }
+.pd-thumb.active { border-color: var(--primary); opacity: 1; box-shadow: 0 16px 35px rgba(37, 99, 235, 0.15); }
 .pd-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
-.pd-thumb i { color: #fff; font-size: 1.4rem; }
-.pd-thumb.active, .pd-thumb:hover { opacity: 1; border-color: var(--primary); }
+.pd-thumb i { position: relative; z-index: 0; font-size: 1.4rem; }
+.pd-thumb:disabled { opacity: 0.3; cursor: not-allowed; }
+
+@keyframes fadeImage {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
 
 .pd-info h1 { font-size: clamp(1.5rem, 2.6vw, 2rem); margin: 6px 0 10px; }
 .pd-description { font-size: 0.98rem; }

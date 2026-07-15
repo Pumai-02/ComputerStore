@@ -131,8 +131,9 @@ async function renderDashboard(content) {
 
 /* ---- Products --------------------------------------------------------- */
 async function loadCategoriesForSelect() {
-  if (categoriesCache.length) return categoriesCache;
-  categoriesCache = await api.get("/admin/categories");
+  if (Array.isArray(categoriesCache) && categoriesCache.length) return categoriesCache;
+  const response = await api.get("/admin/categories");
+  categoriesCache = Array.isArray(response) ? response : response?.data || [];
   return categoriesCache;
 }
 
@@ -259,8 +260,41 @@ function openProductModal(product) {
           <input type="file" id="pf-image-file" accept="image/*">
         </div>
         <div class="admin-field">
-          <label>Gallery Image URLs (comma-separated)</label>
-          <input type="text" id="pf-images" value="${esc((product?.images || []).join(", "))}" placeholder="https://…, https://…">
+          <label>Upload Gallery Images</label>
+          <input type="file" id="pf-images-file" accept="image/*" multiple>
+          <small>Hold Ctrl/Cmd to select up to 4 images.</small>
+        </div>
+      </div>
+      <div class="admin-field-row">
+        <div class="admin-field">
+          <label>Current Image Preview</label>
+          <div id="pf-image-preview" class="pf-preview" style="display:flex;align-items:center;gap:8px"></div>
+        </div>
+        <div class="admin-field">
+          <label>Gallery Previews</label>
+          <div id="pf-gallery-preview" class="pf-gallery-preview" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px"></div>
+        </div>
+      </div>
+      <div class="admin-field-row">
+        <div class="admin-field">
+          <label>Gallery Image 1</label>
+          <input type="text" id="pf-image-0" value="${esc((product?.images || [])[0] || "")}" placeholder="https://…">
+        </div>
+      </div>
+      <div class="admin-field-row">
+        <div class="admin-field">
+          <label>Gallery Image 2</label>
+          <input type="text" id="pf-image-1" value="${esc((product?.images || [])[1] || "")}" placeholder="https://…">
+        </div>
+        <div class="admin-field">
+          <label>Gallery Image 3</label>
+          <input type="text" id="pf-image-2" value="${esc((product?.images || [])[2] || "")}" placeholder="https://…">
+        </div>
+      </div>
+      <div class="admin-field-row">
+        <div class="admin-field">
+          <label>Gallery Image 4</label>
+          <input type="text" id="pf-image-3" value="${esc((product?.images || [])[3] || "")}" placeholder="https://…">
         </div>
       </div>
       <div class="admin-field" style="display:flex;gap:20px">
@@ -276,11 +310,92 @@ function openProductModal(product) {
   );
 
   document.getElementById("productCancelBtn").addEventListener("click", closeModal);
+  // --- Preview setup: show thumbnails for selected files and URL inputs ---
+  (function setupPreviews() {
+    const mainPreviewEl = document.getElementById("pf-image-preview");
+    const galleryPreviewEl = document.getElementById("pf-gallery-preview");
+    const mainImageFileInput = document.getElementById("pf-image-file");
+    const galleryFilesInput = document.getElementById("pf-images-file");
+    const mainImageUrlInput = document.getElementById("pf-image");
+    const galleryUrlInputs = [0, 1, 2, 3].map((i) => document.getElementById(`pf-image-${i}`));
+    const objectUrls = [];
+
+    function clearObjectUrls() {
+      objectUrls.forEach((u) => URL.revokeObjectURL(u));
+      objectUrls.length = 0;
+    }
+
+    function appendThumb(el, src, title) {
+      try {
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = title || "preview";
+        img.className = "pf-preview-thumb";
+        img.style.maxWidth = "88px";
+        img.style.maxHeight = "88px";
+        img.style.objectFit = "cover";
+        img.style.border = "1px solid var(--border, #e2e8f0)";
+        img.style.borderRadius = "4px";
+        img.style.padding = "2px";
+        img.onerror = () => img.remove();
+        el.appendChild(img);
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    function updateMainPreview() {
+      mainPreviewEl.innerHTML = "";
+      clearObjectUrls();
+      const f = mainImageFileInput.files && mainImageFileInput.files[0];
+      if (f) {
+        const u = URL.createObjectURL(f);
+        objectUrls.push(u);
+        appendThumb(mainPreviewEl, u, "file");
+        return;
+      }
+      const urlText = mainImageUrlInput.value.trim();
+      if (urlText) {
+        appendThumb(mainPreviewEl, urlText, "url");
+        return;
+      }
+      if (product?.image) appendThumb(mainPreviewEl, product.image, "existing");
+    }
+
+    function updateGalleryPreview() {
+      galleryPreviewEl.innerHTML = "";
+      // show selected files first
+      const files = Array.from(galleryFilesInput.files || []).slice(0, 4);
+      files.forEach((f) => {
+        const u = URL.createObjectURL(f);
+        objectUrls.push(u);
+        appendThumb(galleryPreviewEl, u, "file");
+      });
+
+      // then show URLs from inputs
+      const urls = galleryUrlInputs.map((i) => i.value.trim()).filter(Boolean);
+      urls.forEach((u) => appendThumb(galleryPreviewEl, u, "url"));
+
+      // if nothing selected, show existing product images
+      if (!files.length && !urls.length && Array.isArray(product?.images)) {
+        (product.images || []).slice(0, 4).forEach((u) => appendThumb(galleryPreviewEl, u, "existing"));
+      }
+    }
+
+    mainImageFileInput.addEventListener("change", updateMainPreview);
+    mainImageUrlInput.addEventListener("input", updateMainPreview);
+    galleryFilesInput.addEventListener("change", updateGalleryPreview);
+    galleryUrlInputs.forEach((inp) => inp.addEventListener("input", updateGalleryPreview));
+
+    // initial render
+    updateMainPreview();
+    updateGalleryPreview();
+  })();
   document.getElementById("productForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const feedback = document.getElementById("productFormFeedback");
-    const imagesRaw = document.getElementById("pf-images").value.trim();
     const imageFile = document.getElementById("pf-image-file").files[0];
+    const galleryFiles = Array.from(document.getElementById("pf-images-file").files);
     const payload = new FormData();
     const categoryValue = document.getElementById("pf-category").value;
 
@@ -308,10 +423,10 @@ function openProductModal(product) {
       payload.append("image_file", imageFile, imageFile.name);
     }
 
-    const parsedImages = imagesRaw ? imagesRaw.split(",").map((s) => s.trim()).filter(Boolean).join(",") : "";
-    if (parsedImages) {
-      payload.append("images", parsedImages);
-    }
+    galleryFiles.slice(0, 4).forEach((file) => payload.append("images_files[]", file, file.name));
+
+    const galleryUrls = [0, 1, 2, 3].map((idx) => document.getElementById(`pf-image-${idx}`).value.trim());
+    payload.append("images", galleryUrls.filter(Boolean).join(","));
 
     payload.append("is_featured", document.getElementById("pf-featured").checked ? "1" : "0");
     payload.append("is_active", document.getElementById("pf-active").checked ? "1" : "0");
@@ -338,7 +453,8 @@ function openProductModal(product) {
 
 /* ---- Categories --------------------------------------------------------- */
 async function renderCategories(content) {
-  categoriesCache = await api.get("/admin/categories");
+  const response = await api.get("/admin/categories");
+  categoriesCache = Array.isArray(response) ? response : response?.data || [];
 
   content.innerHTML = `
     <div class="admin-panel">
@@ -447,7 +563,8 @@ function openCategoryModal(category) {
     payload.append("is_active", document.getElementById("cf-active").checked ? "1" : "0");
     try {
       if (isEdit) {
-        await api.patch(`/admin/categories/${category.id}`, payload);
+        payload.append("_method", "PATCH");
+        await api.post(`/admin/categories/${category.id}`, payload);
         showToast("Category updated");
       } else {
         await api.post("/admin/categories", payload);
@@ -512,23 +629,25 @@ async function openOrderModal(orderId, currentStatusFilter) {
   const statuses = ["pending", "processing", "shipped", "completed", "cancelled"];
   try {
     const o = await api.get(`/admin/orders/${orderId}`);
-    const items = o.items || [];
+    const order = o?.data || o || {};
+    const items = order.items || order.order_items || [];
+    const createdAt = order.created_at ? new Date(order.created_at) : null;
     document.getElementById("adminModalBody").innerHTML = `
-      <p><strong>${esc(o.order_number)}</strong> · ${new Date(o.created_at).toLocaleString()}</p>
-      <p style="color:var(--text-muted);font-size:0.88rem">${esc(o.user?.name || "")} · ${esc(o.user?.email || "")}</p>
+      <p><strong>${esc(order.order_number)}</strong> · ${createdAt ? createdAt.toLocaleString() : "Invalid Date"}</p>
+      <p style="color:var(--text-muted);font-size:0.88rem">${esc(order.user?.name || "")} · ${esc(order.user?.email || "")}</p>
       ${
-        o.shipping_address
-          ? `<p style="font-size:0.88rem"><strong>Ship to:</strong> ${esc(o.shipping_address.line1 || "")}, ${esc(o.shipping_address.city || "")}, ${esc(o.shipping_address.state || "")} ${esc(o.shipping_address.postal_code || "")}, ${esc(o.shipping_address.country || "")}</p>`
+        order.shipping_address
+          ? `<p style="font-size:0.88rem"><strong>Ship to:</strong> ${esc(order.shipping_address.line1 || "")}, ${esc(order.shipping_address.city || "")}, ${esc(order.shipping_address.state || "")} ${esc(order.shipping_address.postal_code || "")}, ${esc(order.shipping_address.country || "")}</p>`
           : ""
       }
       <table class="admin-table">
         <thead><tr><th>Item</th><th>Qty</th><th>Price</th></tr></thead>
         <tbody>${items.map((i) => `<tr><td>${esc(i.product_name)}</td><td>${i.quantity}</td><td>${money(i.product_price)}</td></tr>`).join("")}</tbody>
       </table>
-      <div class="summary-row total" style="margin-top:8px"><span>Total</span><span>${money(o.total)}</span></div>
+      <div class="summary-row total" style="margin-top:8px"><span>Total</span><span>${money(order.total)}</span></div>
       <div class="admin-field" style="margin-top:16px">
         <label>Order Status</label>
-        <select id="orderStatusSelect">${statuses.map((s) => `<option value="${s}" ${s === o.status ? "selected" : ""}>${s}</option>`).join("")}</select>
+        <select id="orderStatusSelect">${statuses.map((s) => `<option value="${s}" ${s === order.status ? "selected" : ""}>${s}</option>`).join("")}</select>
       </div>
       <p class="form-message" id="orderFormFeedback"></p>
       <div class="admin-modal-footer">

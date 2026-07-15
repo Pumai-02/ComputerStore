@@ -63,7 +63,7 @@ function initHeaderSearch() {
       .slice(0, 6)
       .map(
         (p) => `
-      <a class="search-result-row" href="product-details.html?slug=${p.slug}">
+      <a class="search-result-row" href="product-details.html#slug=${p.slug}">
         <span class="search-result-icon" style="background:${p.color}"><i class="fa-solid ${categoryIcon(p.category)}"></i></span>
         <span>
           <strong>${p.name}</strong>
